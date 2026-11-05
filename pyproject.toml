@@ -7,6 +7,7 @@ name = "appsec-lab"
 version = "0.1.0"
 description = "Laboratorio AppSec: Semgrep, SonarQube y ZAP con hallazgos mapeados al OWASP Top 10:2025"
 requires-python = ">=3.12"
+license = "MIT"
 dependencies = ["fastapi>=0.115", "uvicorn>=0.30", "jinja2>=3.1", "typer>=0.12", "python-multipart>=0.0.9"]
 
 [project.optional-dependencies]

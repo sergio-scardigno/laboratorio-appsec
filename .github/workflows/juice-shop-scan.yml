@@ -1,6 +1,12 @@
 name: Análisis de Juice Shop
 
 on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - "LICENSE"
   workflow_dispatch:
     inputs:
       zap_mode:

@@ -9,3 +9,5 @@ __pycache__/
 runs/
 # Reglas de Semgrep: se descargan en la instalación, tienen su propia licencia
 rules/
+# Textos privados: no se publican en este repo
+publicacion/

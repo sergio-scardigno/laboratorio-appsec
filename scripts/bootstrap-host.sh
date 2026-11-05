@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Prepara el host del laboratorio (Ubuntu 24.04, VM o contenedor LXC).
 # Ejecutar como root, indicando el usuario que usará Docker:
-#   bash scripts/bootstrap-host.sh sergio
+#   bash scripts/bootstrap-host.sh <usuario>
 # Desde el host de Proxmox:
-#   pct exec 107 -- bash /home/sergio/appsec-lab/scripts/bootstrap-host.sh sergio
+#   pct exec <id> -- bash /ruta/a/appsec-lab/scripts/bootstrap-host.sh <usuario>
 # Se puede repetir sin efectos adversos.
 set -euo pipefail
 
