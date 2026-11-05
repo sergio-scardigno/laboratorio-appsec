@@ -1,0 +1,320 @@
+{
+ "results": [
+  {
+   "check_id": "rules.yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag",
+   "path": ".github/workflows/ci.yml",
+   "start": {
+    "line": 198,
+    "col": 9,
+    "offset": 9572
+   },
+   "end": {
+    "line": 198,
+    "col": 44,
+    "offset": 9607
+   },
+   "extra": {
+    "severity": "WARNING",
+    "message": "(recortado)",
+    "lines": "requires login",
+    "metadata": {
+     "cwe": [
+      "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+      "CWE-353: Missing Support for Integrity Check"
+     ],
+     "owasp": [
+      "A08:2021 - Software and Data Integrity Failures",
+      "A08:2025 - Software and Data Integrity Failures"
+     ],
+     "confidence": "HIGH"
+    }
+   }
+  },
+  {
+   "check_id": "rules.yaml.github-actions.security.gha-curl-pipe-shell.gha-curl-pipe-shell",
+   "path": ".github/workflows/ci.yml",
+   "start": {
+    "line": 374,
+    "col": 9,
+    "offset": 17303
+   },
+   "end": {
+    "line": 374,
+    "col": 64,
+    "offset": 17358
+   },
+   "extra": {
+    "severity": "ERROR",
+    "message": "(recortado)",
+    "lines": "requires login",
+    "metadata": {
+     "cwe": [
+      "CWE-78: Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')"
+     ],
+     "owasp": [
+      "A03:2021 - Injection",
+      "A03:2025 - Injection"
+     ],
+     "confidence": "HIGH"
+    }
+   }
+  },
+  {
+   "check_id": "rules.terraform.aws.security.aws-subnet-has-public-ip-address.aws-subnet-has-public-ip-address",
+   "path": "data/static/codefixes/iacLeakedKeyChallenge_1.tf",
+   "start": {
+    "line": 17,
+    "col": 1,
+    "offset": 327
+   },
+   "end": {
+    "line": 29,
+    "col": 2,
+    "offset": 795
+   },
+   "extra": {
+    "severity": "WARNING",
+    "message": "(recortado)",
+    "lines": "requires login",
+    "metadata": {
+     "cwe": [
+      "CWE-1220: Insufficient Granularity of Access Control"
+     ],
+     "owasp": [
+      "A01:2021 - Broken Access Control",
+      "A01:2025 - Broken Access Control"
+     ],
+     "confidence": "MEDIUM"
+    }
+   }
+  },
+  {
+   "check_id": "rules.javascript.audit.detect-replaceall-sanitization.detect-replaceall-sanitization",
+   "path": "data/static/codefixes/restfulXssChallenge_2.ts",
+   "start": {
+    "line": 48,
+    "col": 34,
+    "offset": 1757
+   },
+   "end": {
+    "line": 48,
+    "col": 82,
+    "offset": 1805
+   },
+   "extra": {
+    "severity": "INFO",
+    "message": "(recortado)",
+    "lines": "requires login",
+    "metadata": {
+     "cwe": [
+      "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')"
+     ],
+     "owasp": [
+      "A07:2017 - Cross-Site Scripting (XSS)",
+      "A03:2021 - Injection",
+      "A05:2025 - Injection"
+     ],
+     "confidence": "LOW"
+    }
+   }
+  },
+  {
+   "check_id": "rules.javascript.audit.detect-replaceall-sanitization.detect-replaceall-sanitization",
+   "path": "data/static/codefixes/restfulXssChallenge_2.ts",
+   "start": {
+    "line": 48,
+    "col": 34,
+    "offset": 1757
+   },
+   "end": {
+    "line": 48,
+    "col": 106,
+    "offset": 1829
+   },
+   "extra": {
+    "severity": "INFO",
+    "message": "(recortado)",
+    "lines": "requires login",
+    "metadata": {
+     "cwe": [
+      "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')"
+     ],
+     "owasp": [
+      "A07:2017 - Cross-Site Scripting (XSS)",
+      "A03:2021 - Injection",
+      "A05:2025 - Injection"
+     ],
+     "confidence": "LOW"
+    }
+   }
+  },
+  {
+   "check_id": "rules.javascript.lang.security.audit.hardcoded-hmac-key.hardcoded-hmac-key",
+   "path": "lib/insecurity.ts",
+   "start": {
+    "line": 42,
+    "col": 39,
+    "offset": 2260
+   },
+   "end": {
+    "line": 42,
+    "col": 94,
+    "offset": 2315
+   },
+   "extra": {
+    "severity": "WARNING",
+    "message": "(recortado)",
+    "lines": "requires login",
+    "metadata": {
+     "cwe": [
+      "CWE-798: Use of Hard-coded Credentials"
+     ],
+     "owasp": [
+      "A07:2021 - Identification and Authentication Failures",
+      "A07:2025 - Authentication Failures"
+     ],
+     "confidence": "LOW"
+    }
+   }
+  },
+  {
+   "check_id": "rules.javascript.jsonwebtoken.security.jwt-hardcode.hardcoded-jwt-secret",
+   "path": "lib/insecurity.ts",
+   "start": {
+    "line": 54,
+    "col": 56,
+    "offset": 2738
+   },
+   "end": {
+    "line": 54,
+    "col": 66,
+    "offset": 2748
+   },
+   "extra": {
+    "severity": "WARNING",
+    "message": "(recortado)",
+    "lines": "requires login",
+    "metadata": {
+     "cwe": [
+      "CWE-798: Use of Hard-coded Credentials"
+     ],
+     "owasp": [
+      "A07:2021 - Identification and Authentication Failures",
+      "A07:2025 - Authentication Failures"
+     ],
+     "confidence": "HIGH"
+    }
+   }
+  },
+  {
+   "check_id": "rules.javascript.lang.security.audit.hardcoded-hmac-key.hardcoded-hmac-key",
+   "path": "lib/insecurity.ts",
+   "start": {
+    "line": 150,
+    "col": 16,
+    "offset": 6192
+   },
+   "end": {
+    "line": 150,
+    "col": 55,
+    "offset": 6231
+   },
+   "extra": {
+    "severity": "WARNING",
+    "message": "(recortado)",
+    "lines": "requires login",
+    "metadata": {
+     "cwe": [
+      "CWE-798: Use of Hard-coded Credentials"
+     ],
+     "owasp": [
+      "A07:2021 - Identification and Authentication Failures",
+      "A07:2025 - Authentication Failures"
+     ],
+     "confidence": "LOW"
+    }
+   }
+  },
+  {
+   "check_id": "rules.javascript.browser.security.eval-detected.eval-detected",
+   "path": "routes/captcha.ts",
+   "start": {
+    "line": 22,
+    "col": 20,
+    "offset": 874
+   },
+   "end": {
+    "line": 22,
+    "col": 36,
+    "offset": 890
+   },
+   "extra": {
+    "severity": "WARNING",
+    "message": "(recortado)",
+    "lines": "requires login",
+    "metadata": {
+     "cwe": [
+      "CWE-95: Improper Neutralization of Directives in Dynamically Evaluated Code ('Eval Injection')"
+     ],
+     "owasp": [
+      "A03:2021 - Injection",
+      "A05:2025 - Injection"
+     ],
+     "confidence": "LOW"
+    }
+   }
+  },
+  {
+   "check_id": "rules.javascript.sequelize.security.audit.sequelize-injection-express.express-sequelize-injection",
+   "path": "routes/login.ts",
+   "start": {
+    "line": 34,
+    "col": 28,
+    "offset": 1488
+   },
+   "end": {
+    "line": 34,
+    "col": 169,
+    "offset": 1629
+   },
+   "extra": {
+    "severity": "ERROR",
+    "message": "(recortado)",
+    "lines": "requires login",
+    "metadata": {
+     "cwe": [
+      "CWE-89: Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')"
+     ],
+     "owasp": [
+      "A01:2017 - Injection",
+      "A03:2021 - Injection",
+      "A05:2025 - Injection"
+     ],
+     "confidence": "HIGH"
+    }
+   }
+  }
+ ],
+ "errors": [
+  {
+   "type": "Syntax error",
+   "level": "warn",
+   "path": "data/static/codefixes/registerAdminChallenge_2.ts"
+  },
+  {
+   "type": "Syntax error",
+   "level": "warn",
+   "path": "data/static/codefixes/registerAdminChallenge_4.ts"
+  },
+  {
+   "type": "Syntax error",
+   "level": "warn",
+   "path": "data/static/codefixes/registerAdminChallenge_3_correct.ts"
+  }
+ ],
+ "paths": {
+  "scanned": [
+   "recortado"
+  ]
+ }
+}

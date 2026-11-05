@@ -1,0 +1,485 @@
+{
+ "project_key": "lab-raw1",
+ "issues": [
+  {
+   "key": "1b3f0915-ad46-4bfb-9ab0-b2ca276bcf57",
+   "rule": "typescript:S5332",
+   "severity": "MINOR",
+   "type": "VULNERABILITY",
+   "component": "lab-raw1:data/datacreator.ts",
+   "line": 86,
+   "message": "Using http protocol is insecure. Use https instead.",
+   "impacts": [
+    {
+     "softwareQuality": "SECURITY",
+     "severity": "LOW"
+    }
+   ]
+  },
+  {
+   "key": "adbb271a-0caf-471d-941e-ad24cd11d393",
+   "rule": "typescript:S5332",
+   "severity": "MINOR",
+   "type": "VULNERABILITY",
+   "component": "lab-raw1:data/datacreator.ts",
+   "line": 173,
+   "message": "Using http protocol is insecure. Use https instead.",
+   "impacts": [
+    {
+     "softwareQuality": "SECURITY",
+     "severity": "LOW"
+    }
+   ]
+  },
+  {
+   "key": "a0b2606e-132b-4bb7-a450-912783e7c995",
+   "rule": "typescript:S2245",
+   "severity": "MAJOR",
+   "type": "VULNERABILITY",
+   "component": "lab-raw1:data/datacreator.ts",
+   "line": 305,
+   "message": "Make sure that using this pseudorandom number generator is safe here.",
+   "impacts": [
+    {
+     "softwareQuality": "SECURITY",
+     "severity": "MEDIUM"
+    }
+   ]
+  },
+  {
+   "key": "ec10e71b-3043-4bef-9597-ec19d3d0bad5",
+   "rule": "typescript:S2245",
+   "severity": "MAJOR",
+   "type": "VULNERABILITY",
+   "component": "lab-raw1:data/datacreator.ts",
+   "line": 323,
+   "message": "Make sure that using this pseudorandom number generator is safe here.",
+   "impacts": [
+    {
+     "softwareQuality": "SECURITY",
+     "severity": "MEDIUM"
+    }
+   ]
+  },
+  {
+   "key": "2a4e9a86-7360-4db9-8ccf-961bb098d5aa",
+   "rule": "typescript:S2245",
+   "severity": "MAJOR",
+   "type": "VULNERABILITY",
+   "component": "lab-raw1:data/datacreator.ts",
+   "line": 381,
+   "message": "Make sure that using this pseudorandom number generator is safe here.",
+   "impacts": [
+    {
+     "softwareQuality": "SECURITY",
+     "severity": "MEDIUM"
+    }
+   ]
+  },
+  {
+   "key": "3cf429e4-ccf1-44b8-82f2-0acf92cc3e58",
+   "rule": "typescript:S5332",
+   "severity": "MINOR",
+   "type": "VULNERABILITY",
+   "component": "lab-raw1:data/static/codefixes/redirectChallenge_1.ts",
+   "line": 6,
+   "message": "Using http protocol is insecure. Use https instead.",
+   "impacts": [
+    {
+     "softwareQuality": "SECURITY",
+     "severity": "LOW"
+    }
+   ]
+  },
+  {
+   "key": "9718ebe0-9b85-4624-8c11-9ae2817f17b9",
+   "rule": "secrets:S6706",
+   "severity": "BLOCKER",
+   "type": "VULNERABILITY",
+   "component": "lab-raw1:infrastructure/terraform/networking.tf",
+   "line": 171,
+   "message": "Make sure this private key gets revoked, changed, and removed from the code.",
+   "impacts": [
+    {
+     "softwareQuality": "SECURITY",
+     "severity": "BLOCKER"
+    }
+   ]
+  },
+  {
+   "key": "61a7e676-041c-4662-a282-b9d59cb70b9a",
+   "rule": "secrets:S6706",
+   "severity": "BLOCKER",
+   "type": "VULNERABILITY",
+   "component": "lab-raw1:lib/insecurity.ts",
+   "line": 21,
+   "message": "Make sure this private key gets revoked, changed, and removed from the code.",
+   "impacts": [
+    {
+     "softwareQuality": "SECURITY",
+     "severity": "BLOCKER"
+    }
+   ]
+  },
+  {
+   "key": "80b32409-57d4-45eb-b915-64f0825fd124",
+   "rule": "typescript:S4790",
+   "severity": "CRITICAL",
+   "type": "VULNERABILITY",
+   "component": "lab-raw1:lib/insecurity.ts",
+   "line": 41,
+   "message": "Make sure this weak hash algorithm is not used in a sensitive context here.",
+   "impacts": [
+    {
+     "softwareQuality": "SECURITY",
+     "severity": "HIGH"
+    }
+   ]
+  },
+  {
+   "key": "10aac809-3ba8-4e95-bed1-a132575f490e",
+   "rule": "typescript:S6437",
+   "severity": "BLOCKER",
+   "type": "VULNERABILITY",
+   "component": "lab-raw1:lib/insecurity.ts",
+   "line": 42,
+   "message": "Revoke and change this password, as it is compromised.",
+   "impacts": [
+    {
+     "softwareQuality": "SECURITY",
+     "severity": "BLOCKER"
+    }
+   ]
+  },
+  {
+   "key": "77930254-e78c-4c17-8ed2-88fb11a48a07",
+   "rule": "typescript:S2245",
+   "severity": "MAJOR",
+   "type": "VULNERABILITY",
+   "component": "lab-raw1:lib/insecurity.ts",
+   "line": 53,
+   "message": "Make sure that using this pseudorandom number generator is safe here.",
+   "impacts": [
+    {
+     "softwareQuality": "SECURITY",
+     "severity": "MEDIUM"
+    }
+   ]
+  },
+  {
+   "key": "d0cb94f6-2be4-4307-9e83-dda56f559dd1",
+   "rule": "typescript:S5332",
+   "severity": "MINOR",
+   "type": "VULNERABILITY",
+   "component": "lab-raw1:lib/insecurity.ts",
+   "line": 127,
+   "message": "Using http protocol is insecure. Use https instead.",
+   "impacts": [
+    {
+     "softwareQuality": "SECURITY",
+     "severity": "LOW"
+    }
+   ]
+  },
+  {
+   "key": "16465bd0-7ec4-412b-8c5e-13aa736ed6b8",
+   "rule": "typescript:S5332",
+   "severity": "MINOR",
+   "type": "VULNERABILITY",
+   "component": "lab-raw1:lib/insecurity.ts",
+   "line": 128,
+   "message": "Using http protocol is insecure. Use https instead.",
+   "impacts": [
+    {
+     "softwareQuality": "SECURITY",
+     "severity": "LOW"
+    }
+   ]
+  },
+  {
+   "key": "24eabcf3-fcfb-405e-a551-2865e4d9ddc9",
+   "rule": "typescript:S5332",
+   "severity": "MINOR",
+   "type": "VULNERABILITY",
+   "component": "lab-raw1:lib/insecurity.ts",
+   "line": 130,
+   "message": "Using http protocol is insecure. Use https instead.",
+   "impacts": [
+    {
+     "softwareQuality": "SECURITY",
+     "severity": "LOW"
+    }
+   ]
+  },
+  {
+   "key": "47bbeed7-2dd3-4089-a8ac-98d7a401856d",
+   "rule": "typescript:S1523",
+   "severity": "CRITICAL",
+   "type": "VULNERABILITY",
+   "component": "lab-raw1:lib/xml.ts",
+   "line": 38,
+   "message": "Make sure that this dynamic injection or execution of code is safe.",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "LOW"
+    },
+    {
+     "softwareQuality": "SECURITY",
+     "severity": "HIGH"
+    }
+   ]
+  },
+  {
+   "key": "efe373b6-e4d7-482a-abc1-11e1ef7aca60",
+   "rule": "typescript:S1523",
+   "severity": "CRITICAL",
+   "type": "VULNERABILITY",
+   "component": "lab-raw1:routes/b2bOrder.ts",
+   "line": 23,
+   "message": "Make sure that this dynamic injection or execution of code is safe.",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "LOW"
+    },
+    {
+     "softwareQuality": "SECURITY",
+     "severity": "HIGH"
+    }
+   ]
+  },
+  {
+   "key": "109bd52f-f1da-4fb3-824a-02a81891f6d4",
+   "rule": "typescript:S2245",
+   "severity": "MAJOR",
+   "type": "VULNERABILITY",
+   "component": "lab-raw1:routes/captcha.ts",
+   "line": 14,
+   "message": "Make sure that using this pseudorandom number generator is safe here.",
+   "impacts": [
+    {
+     "softwareQuality": "SECURITY",
+     "severity": "MEDIUM"
+    }
+   ]
+  },
+  {
+   "key": "0d9af7aa-b129-41d1-a4f7-222a1421c9c2",
+   "rule": "typescript:S2245",
+   "severity": "MAJOR",
+   "type": "VULNERABILITY",
+   "component": "lab-raw1:routes/captcha.ts",
+   "line": 15,
+   "message": "Make sure that using this pseudorandom number generator is safe here.",
+   "impacts": [
+    {
+     "softwareQuality": "SECURITY",
+     "severity": "MEDIUM"
+    }
+   ]
+  },
+  {
+   "key": "674ef28b-1b60-477c-b8bf-8f96d08bd23e",
+   "rule": "typescript:S2245",
+   "severity": "MAJOR",
+   "type": "VULNERABILITY",
+   "component": "lab-raw1:routes/captcha.ts",
+   "line": 16,
+   "message": "Make sure that using this pseudorandom number generator is safe here.",
+   "impacts": [
+    {
+     "softwareQuality": "SECURITY",
+     "severity": "MEDIUM"
+    }
+   ]
+  },
+  {
+   "key": "15c1895b-fc40-4948-9818-df7258063f43",
+   "rule": "typescript:S2245",
+   "severity": "MAJOR",
+   "type": "VULNERABILITY",
+   "component": "lab-raw1:routes/captcha.ts",
+   "line": 18,
+   "message": "Make sure that using this pseudorandom number generator is safe here.",
+   "impacts": [
+    {
+     "softwareQuality": "SECURITY",
+     "severity": "MEDIUM"
+    }
+   ]
+  },
+  {
+   "key": "32a03f6e-ed51-4b82-929b-0dae60289d6d",
+   "rule": "typescript:S2245",
+   "severity": "MAJOR",
+   "type": "VULNERABILITY",
+   "component": "lab-raw1:routes/captcha.ts",
+   "line": 19,
+   "message": "Make sure that using this pseudorandom number generator is safe here.",
+   "impacts": [
+    {
+     "softwareQuality": "SECURITY",
+     "severity": "MEDIUM"
+    }
+   ]
+  },
+  {
+   "key": "1c6cd7f6-d6a1-40fa-9c5c-b4731c3cb5be",
+   "rule": "typescript:S1523",
+   "severity": "CRITICAL",
+   "type": "VULNERABILITY",
+   "component": "lab-raw1:routes/captcha.ts",
+   "line": 22,
+   "message": "Make sure that this dynamic injection or execution of code is safe.",
+   "impacts": [
+    {
+     "softwareQuality": "MAINTAINABILITY",
+     "severity": "LOW"
+    },
+    {
+     "softwareQuality": "SECURITY",
+     "severity": "HIGH"
+    }
+   ]
+  },
+  {
+   "key": "8755d386-1da0-47fe-9ff8-0cb22f84e077",
+   "rule": "typescript:S5693",
+   "severity": "MAJOR",
+   "type": "VULNERABILITY",
+   "component": "lab-raw1:server.ts",
+   "line": 728,
+   "message": "Make sure the content length limit is safe here.",
+   "impacts": [
+    {
+     "softwareQuality": "SECURITY",
+     "severity": "MEDIUM"
+    }
+   ]
+  },
+  {
+   "key": "21a23bae-17db-4099-9afe-7ff7a06b37bb",
+   "rule": "secrets:S6706",
+   "severity": "BLOCKER",
+   "type": "VULNERABILITY",
+   "component": "lab-raw1:terraform/networking.tf",
+   "line": 171,
+   "message": "Make sure this private key gets revoked, changed, and removed from the code.",
+   "impacts": [
+    {
+     "softwareQuality": "SECURITY",
+     "severity": "BLOCKER"
+    }
+   ]
+  }
+ ],
+ "issues_total": 24,
+ "hotspots": [],
+ "hotspots_total": 0,
+ "rules": {
+  "typescript:S4790": {
+   "name": "Weak hashing algorithms should not be used",
+   "sysTags": [
+    "cwe",
+    "cryptography",
+    "former-hotspot"
+   ],
+   "cwes": [
+    "1240"
+   ],
+   "owasp2021": [
+    "a2"
+   ]
+  },
+  "typescript:S1523": {
+   "name": "Dynamic code execution should not use user-controlled data",
+   "sysTags": [
+    "cwe",
+    "former-hotspot"
+   ],
+   "cwes": [
+    "470",
+    "95"
+   ],
+   "owasp2021": [
+    "a3"
+   ]
+  },
+  "typescript:S5693": {
+   "name": "HTTP request content length should be limited",
+   "sysTags": [
+    "cwe",
+    "express.js",
+    "former-hotspot"
+   ],
+   "cwes": [
+    "400",
+    "770"
+   ],
+   "owasp2021": [
+    "a5"
+   ]
+  },
+  "secrets:S6706": {
+   "name": "Cryptographic private keys should not be disclosed",
+   "sysTags": [
+    "cwe",
+    "secret"
+   ],
+   "cwes": [
+    "259",
+    "798"
+   ],
+   "owasp2021": [
+    "a7"
+   ]
+  },
+  "typescript:S5332": {
+   "name": "Clear-text protocols should not be used",
+   "sysTags": [
+    "cwe",
+    "cryptography",
+    "former-hotspot"
+   ],
+   "cwes": [
+    "200",
+    "319"
+   ],
+   "owasp2021": [
+    "a2"
+   ]
+  },
+  "typescript:S6437": {
+   "name": "Credentials should not be hard-coded",
+   "sysTags": [
+    "cwe",
+    "secret"
+   ],
+   "cwes": [
+    "259",
+    "798"
+   ],
+   "owasp2021": [
+    "a7"
+   ]
+  },
+  "typescript:S2245": {
+   "name": "Pseudorandom number generators (PRNGs) should not be used in security contexts",
+   "sysTags": [
+    "cwe",
+    "cryptography",
+    "former-hotspot"
+   ],
+   "cwes": [
+    "1241",
+    "326",
+    "330",
+    "338"
+   ],
+   "owasp2021": [
+    "a2"
+   ]
+  }
+ }
+}

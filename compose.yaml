@@ -1,0 +1,83 @@
+# Servicios fijos del laboratorio. Los escáneres (Semgrep, sonar-scanner, ZAP) son
+# contenedores efímeros que lanza el orquestador; sus imágenes están en lab/images.py.
+name: appsec-lab
+
+services:
+  postgres:
+    image: postgres:17.11@sha256:3b0cda93be7c8dba2ed484d19393d93845dc3dafb88973e248ba8e6d99d784e1
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: sonar
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?ejecuta "make env" primero}
+      POSTGRES_DB: sonar
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - sonar-db
+    mem_limit: 512m
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sonar -d sonar"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  sonarqube:
+    image: sonarqube:26.10.0.133078-community@sha256:f95aaa9016dd4e92c7d70691167a6d96dbb5d8acffd61eba1cb4335d364a7840
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://postgres:5432/sonar
+      SONAR_JDBC_USERNAME: sonar
+      SONAR_JDBC_PASSWORD: ${POSTGRES_PASSWORD:?ejecuta "make env" primero}
+      SONAR_TELEMETRY_ENABLE: "false"
+    volumes:
+      - sonarqube-data:/opt/sonarqube/data
+      - sonarqube-extensions:/opt/sonarqube/extensions
+      - sonarqube-logs:/opt/sonarqube/logs
+    ports:
+      # Solo en localhost: se accede por túnel SSH.
+      - "127.0.0.1:9000:9000"
+    networks:
+      - sonar-db
+      - sonar-front
+    mem_limit: 4g
+    ulimits:
+      nofile: 131072
+      nproc: 8192
+    security_opt:
+      - no-new-privileges:true
+
+  juice-shop:
+    # Misma versión que el código que clona el preset, para que SAST y DAST
+    # analicen lo mismo.
+    image: bkimminich/juice-shop:v20.3.0@sha256:cea5a4af4aacee498c491491af0408934ec81d004035c0a02ef3e54395e3bf27
+    restart: unless-stopped
+    # Aplicación deliberadamente vulnerable: red interna, sin salida a internet
+    # ni a la LAN, y sin puertos publicados. ZAP se une a esta red para analizarla.
+    networks:
+      - lab-internal
+    mem_limit: 1g
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+networks:
+  lab-internal:
+    name: lab-internal
+    internal: true
+  sonar-db:
+    name: lab-sonar-db
+    internal: true
+  sonar-front:
+    name: lab-sonar-front
+
+volumes:
+  postgres-data:
+  sonarqube-data:
+  sonarqube-extensions:
+  sonarqube-logs:

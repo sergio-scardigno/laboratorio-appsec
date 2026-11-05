@@ -1,0 +1,31 @@
+{% extends "_layout.html" %}
+{% block title %}Análisis {{ run.target }}{% endblock %}
+{% block body %}
+<div id="run" data-events="/runs/{{ run.id }}/events.json" data-finished="{{ 1 if finished else 0 }}">
+  <h1>{{ run.target }}</h1>
+  <p class="lead">Estado: {{ status_labels.get(run.status, run.status) }}{% if run.request.active %}. ZAP en modo activo{% endif %}.
+  {% if not finished %}Esta página se actualiza sola.{% endif %}</p>
+
+  <ol class="steps">
+  {% for s in stages %}
+    <li data-stage="{{ s.id }}" data-state="{{ s.state }}">
+      <span class="name">{{ s.name }}</span>
+      <span class="state">{{ s.label }}</span>
+      <span class="detail">{{ s.message }}</span>
+    </li>
+  {% endfor %}
+  </ol>
+
+  {% if finished %}
+  {% if run.status == "partial" %}<div class="banner error" role="alert"><strong>Análisis parcial.</strong> Alguna herramienta falló: el informe no cubre lo que ella debía ver.</div>{% endif %}
+  {% if run.summary and run.summary.message %}<div class="banner error" role="alert"><strong>No se ha completado.</strong> {{ run.summary.message }}</div>{% endif %}
+  <div class="done">
+    {% if report_ready %}
+      <a class="button" href="/runs/{{ run.id }}/report">Ver el informe</a>
+      <a href="/runs/{{ run.id }}/findings.json">Descargar findings.json</a>
+    {% endif %}
+    <a href="/">Lanzar otro análisis</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

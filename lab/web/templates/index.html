@@ -1,0 +1,75 @@
+{% extends "_layout.html" %}
+{% block body %}
+<h1>Analiza una web o un repo</h1>
+<p class="lead">Semgrep y SonarQube leen el código, ZAP prueba la web, y los hallazgos se agrupan por categoría del OWASP Top 10:2025.</p>
+{% if error %}<div class="banner error" role="alert"><strong>No se ha lanzado el análisis.</strong> {{ error }}</div>{% endif %}
+{% if not sonar_ready %}<div class="banner error" role="alert"><strong>SonarQube no está configurado.</strong> Ejecuta <code>make sonar</code> o ese paso fallará.</div>{% endif %}
+
+<div class="grid">
+  <section class="quick">
+    <h2>Probar con Juice Shop</h2>
+    <p>Tienda vulnerable a propósito, aislada en una red sin salida. Se puede atacar sin riesgo.</p>
+    <form method="post" action="/scans">
+      <input type="hidden" name="preset" value="juice-shop">
+      <div class="modes">
+        <label class="check"><input type="radio" name="mode" value="passive" checked> <span>Rápido, ZAP solo observa<small>Unos 10 minutos</small></span></label>
+        <label class="check"><input type="radio" name="mode" value="active"> <span>Completo, ZAP ataca<small>Unos 15 minutos</small></span></label>
+      </div>
+      <div class="actions"><button type="submit">Analizar Juice Shop</button></div>
+    </form>
+  </section>
+
+  <section class="panel">
+    <h2>Tu propio objetivo</h2>
+    <form method="post" action="/scans">
+      <div class="field">
+        <label for="repo">Repo público</label>
+        <input id="repo" name="repo" type="url" placeholder="https://github.com/usuario/proyecto" value="{{ form.repo or '' }}">
+        <small>Solo se lee: nunca se compila ni se ejecuta.</small>
+      </div>
+      <div class="field">
+        <label for="ref">Rama o etiqueta</label>
+        <input id="ref" name="ref" type="text" placeholder="La rama principal" value="{{ form.ref or '' }}">
+      </div>
+      <div class="field">
+        <label for="url">Web</label>
+        <input id="url" name="url" type="url" placeholder="https://ejemplo.com" value="{{ form.url or '' }}">
+        <small>Puedes indicar repo, web o ambos.</small>
+      </div>
+      <fieldset class="modes">
+        <legend class="hidden" style="display:none">Modo de ZAP</legend>
+        <label class="check"><input type="radio" name="mode" value="passive" {% if form.mode != "active" %}checked{% endif %}> <span>ZAP solo observa<small>Rastrea la web y revisa las respuestas, sin atacar.</small></span></label>
+        <label class="check"><input type="radio" name="mode" value="active" {% if form.mode == "active" %}checked{% endif %}> <span>ZAP ataca<small>Envía ataques reales: puede alterar datos o tumbar la web.</small></span></label>
+      </fieldset>
+      <div class="warn">
+        <label class="check"><input type="checkbox" name="authorized"> <span>Tengo autorización para analizar esta web<small>Obligatorio con cualquier web. Analizar sitios ajenos sin permiso puede ser ilegal. Queda registrado.</small></span></label>
+        <label class="check" style="margin-top:8px"><input type="checkbox" name="active_confirmed"> <span>Confirmo que quiero atacarla<small>Obligatorio solo si ZAP ataca.</small></span></label>
+      </div>
+      <div class="actions"><button type="submit">Lanzar el análisis</button></div>
+    </form>
+  </section>
+</div>
+
+<section class="hist">
+  <h2>Análisis anteriores</h2>
+  {% if runs %}
+  <div class="scroll">
+  <table class="runs">
+    <thead><tr><th scope="col">Fecha (UTC)</th><th scope="col">Objetivo</th><th scope="col">Estado</th><th scope="col">Hallazgos</th></tr></thead>
+    <tbody>
+    {% for r in runs %}
+      <tr>
+        <td><a href="/runs/{{ r.id }}">{{ r.created_at[:16] | replace("T", " ") }}</a></td>
+        <td class="t">{{ r.target }}{% if r.request.active %} (ZAP activo){% endif %}</td>
+        <td>{{ status_labels.get(r.status, r.status) }}</td>
+        <td>{{ r.summary.total if r.summary and r.summary.total is defined else "—" }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+  <p class="muted">Todavía no hay análisis. Empieza por Juice Shop para ver cómo queda el informe.</p>
+  {% endif %}
+</section>
+{% endblock %}

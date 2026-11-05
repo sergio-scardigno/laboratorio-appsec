@@ -1,0 +1,18 @@
+# Instalar como root:
+#   cp deploy/appsec-lab-web.service /etc/systemd/system/
+#   systemctl daemon-reload && systemctl enable --now appsec-lab-web
+[Unit]
+Description=Laboratorio AppSec (web)
+After=docker.service
+Requires=docker.service
+
+[Service]
+User=sergio
+SupplementaryGroups=docker
+WorkingDirectory=/home/sergio/appsec-lab
+ExecStart=/home/sergio/appsec-lab/.venv/bin/lab web
+Restart=on-failure
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

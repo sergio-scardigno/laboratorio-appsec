@@ -1,0 +1,11 @@
+.env
+.env.tmp
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+# Resultados de los análisis
+runs/
+# Reglas de Semgrep: se descargan en la instalación, tienen su propia licencia
+rules/

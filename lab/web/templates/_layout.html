@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Laboratorio AppSec{% endblock %}</title>
+<style>
+{% include "_tokens.css" %}
+.top { padding: 22px 0 0; font-size: .9rem; } .top a { color: var(--ink-2); text-decoration: none; } .top a:hover { color: var(--ink); text-decoration: underline; }
+main { padding: 30px 0 72px; }
+.lead { max-width: 62ch; margin: 12px 0 0; color: var(--ink-2); }
+fieldset { border: 0; padding: 0; margin: 0; }
+.field { margin-top: 16px; } .field label { display: block; font-weight: 600; font-size: .95rem; margin-bottom: 4px; }
+.field small, .check small { display: block; color: var(--ink-2); font-size: .85rem; font-weight: 400; }
+input[type=url], input[type=text] { width: 100%; max-width: 620px; font: inherit; padding: .55rem .65rem; border: 1px solid var(--rule); border-radius: 4px; background: var(--surface); color: var(--ink); }
+.panel { background: var(--surface); border: 1px solid var(--rule); padding: 22px 24px; }
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 20px; margin-top: 28px; align-items: start; }
+.quick { background: transparent; border-color: transparent; padding: 22px 0; }
+.quick p { margin: 8px 0 14px; font-size: .92rem; color: var(--ink-2); }
+.modes { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+.check { display: flex; gap: 8px; align-items: flex-start; font-size: .95rem; }
+.check input { margin-top: .3em; }
+.warn { border-left: 4px solid var(--warning); padding: 8px 12px; margin-top: 14px; background: var(--paper); }
+.actions { margin-top: 20px; }
+.error { margin-top: 18px; }
+.hist { margin-top: 44px; }
+.scroll { overflow-x: auto; }
+table.runs { border-collapse: collapse; width: 100%; margin-top: 10px; font-size: .92rem; }
+.runs th, .runs td { text-align: left; padding: 8px 14px 8px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.runs th { font-weight: 600; } .runs td.t { overflow-wrap: anywhere; min-width: 200px; }
+.steps { list-style: none; padding: 0; margin: 24px 0 0; max-width: 720px; counter-reset: s; }
+.steps li { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 2px 8px; padding: 12px 0; border-bottom: 1px solid var(--rule); counter-increment: s; }
+.steps li::before { content: counter(s); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.steps .state { color: var(--ink-2); font-size: .9rem; }
+.steps .detail { grid-column: 2 / 4; font-size: .85rem; color: var(--ink-2); overflow-wrap: anywhere; }
+.steps .detail:empty { display: none; }
+.steps li[data-state=running] .name, .steps li[data-state=running] .state { font-weight: 600; color: var(--ink); }
+.steps li[data-state=error] .state { color: var(--critical); font-weight: 600; }
+.steps li[data-state=skipped] { color: var(--ink-2); }
+.done { margin-top: 24px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+@media (max-width: 760px) { .grid { grid-template-columns: minmax(0, 1fr); gap: 0; } .quick { padding: 0 0 18px; } .panel { padding: 18px 16px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="/">Laboratorio AppSec</a></div>
+  <main>{% block body %}{% endblock %}</main>
+</div>
+<script src="/app.js"></script>
+</body>
+</html>

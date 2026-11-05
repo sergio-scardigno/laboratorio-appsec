@@ -1,0 +1,358 @@
+{
+ "site": [
+  {
+   "@name": "http://juice-shop:3000",
+   "alerts": [
+    {
+     "pluginid": "40018",
+     "alertRef": "40018",
+     "alert": "SQL Injection",
+     "name": "SQL Injection",
+     "riskcode": "3",
+     "confidence": "1",
+     "riskdesc": "High (Low)",
+     "cweid": "89",
+     "wascid": "19",
+     "count": "2",
+     "desc": "<p>(recortado)</p>",
+     "solution": "<p>(recortado)</p>",
+     "instances": [
+      {
+       "uri": "http://juice-shop:3000/rest/products/search?q=%27%28",
+       "method": "GET",
+       "param": "q",
+       "attack": "'(",
+       "evidence": "HTTP/1.1 500 Internal Server Error"
+      },
+      {
+       "uri": "http://juice-shop:3000/rest/user/login",
+       "method": "POST",
+       "param": "email",
+       "attack": "'",
+       "evidence": "HTTP/1.1 500 Internal Server Error"
+      }
+     ]
+    },
+    {
+     "pluginid": "10038",
+     "alertRef": "10038-1",
+     "alert": "Content Security Policy (CSP) Header Not Set",
+     "name": "Content Security Policy (CSP) Header Not Set",
+     "riskcode": "2",
+     "confidence": "3",
+     "riskdesc": "Medium (High)",
+     "cweid": "693",
+     "wascid": "15",
+     "count": "5",
+     "desc": "<p>(recortado)</p>",
+     "solution": "<p>(recortado)</p>",
+     "instances": [
+      {
+       "uri": "http://juice-shop:3000",
+       "method": "GET",
+       "param": "",
+       "attack": "",
+       "evidence": ""
+      },
+      {
+       "uri": "http://juice-shop:3000/",
+       "method": "GET",
+       "param": "",
+       "attack": "",
+       "evidence": ""
+      }
+     ]
+    },
+    {
+     "pluginid": "10098",
+     "alertRef": "10098",
+     "alert": "Cross-Domain Misconfiguration",
+     "name": "Cross-Domain Misconfiguration",
+     "riskcode": "2",
+     "confidence": "2",
+     "riskdesc": "Medium (Medium)",
+     "cweid": "264",
+     "wascid": "14",
+     "count": "5",
+     "desc": "<p>(recortado)</p>",
+     "solution": "<p>(recortado)</p>",
+     "instances": [
+      {
+       "uri": "http://juice-shop:3000",
+       "method": "GET",
+       "param": "",
+       "attack": "",
+       "evidence": "Access-Control-Allow-Origin: *"
+      },
+      {
+       "uri": "http://juice-shop:3000/",
+       "method": "GET",
+       "param": "",
+       "attack": "",
+       "evidence": "Access-Control-Allow-Origin: *"
+      }
+     ]
+    },
+    {
+     "pluginid": "10020",
+     "alertRef": "10020-1",
+     "alert": "Missing Anti-clickjacking Header",
+     "name": "Missing Anti-clickjacking Header",
+     "riskcode": "2",
+     "confidence": "2",
+     "riskdesc": "Medium (Medium)",
+     "cweid": "1021",
+     "wascid": "15",
+     "count": "1",
+     "desc": "<p>(recortado)</p>",
+     "solution": "<p>(recortado)</p>",
+     "instances": [
+      {
+       "uri": "http://juice-shop:3000/socket.io/?EIO=4&transport=polling&t=m9wrphyy&sid=IOLQGShjJAZfEtkjAAAE",
+       "method": "POST",
+       "param": "x-frame-options",
+       "attack": "",
+       "evidence": ""
+      }
+     ]
+    },
+    {
+     "pluginid": "3",
+     "alertRef": "3-1",
+     "alert": "Session ID in URL Rewrite",
+     "name": "Session ID in URL Rewrite",
+     "riskcode": "2",
+     "confidence": "3",
+     "riskdesc": "Medium (High)",
+     "cweid": "598",
+     "wascid": "13",
+     "count": "5",
+     "desc": "<p>(recortado)</p>",
+     "solution": "<p>(recortado)</p>",
+     "instances": [
+      {
+       "uri": "http://juice-shop:3000/socket.io/?EIO=4&transport=polling&t=m9wrqky5&sid=IOLQGShjJAZfEtkjAAAE",
+       "method": "GET",
+       "param": "sid",
+       "attack": "",
+       "evidence": "IOLQGShjJAZfEtkjAAAE"
+      },
+      {
+       "uri": "http://juice-shop:3000/socket.io/?EIO=4&transport=websocket&sid=5U9ht1aIM_nq2mO4AAAF",
+       "method": "GET",
+       "param": "sid",
+       "attack": "",
+       "evidence": "5U9ht1aIM_nq2mO4AAAF"
+      }
+     ]
+    },
+    {
+     "pluginid": "90022",
+     "alertRef": "90022",
+     "alert": "Application Error Disclosure",
+     "name": "Application Error Disclosure",
+     "riskcode": "1",
+     "confidence": "2",
+     "riskdesc": "Low (Medium)",
+     "cweid": "550",
+     "wascid": "13",
+     "count": "1",
+     "desc": "<p>(recortado)</p>",
+     "solution": "<p>(recortado)</p>",
+     "instances": [
+      {
+       "uri": "http://juice-shop:3000/rest/user/reset-password",
+       "method": "POST",
+       "param": "",
+       "attack": "",
+       "evidence": "HTTP/1.1 500 Internal Server Error"
+      }
+     ]
+    },
+    {
+     "pluginid": "2",
+     "alertRef": "2",
+     "alert": "Private IP Disclosure",
+     "name": "Private IP Disclosure",
+     "riskcode": "1",
+     "confidence": "2",
+     "riskdesc": "Low (Medium)",
+     "cweid": "497",
+     "wascid": "13",
+     "count": "2",
+     "desc": "<p>(recortado)</p>",
+     "solution": "<p>(recortado)</p>",
+     "instances": [
+      {
+       "uri": "http://juice-shop:3000/rest/admin/application-configuration",
+       "method": "GET",
+       "param": "",
+       "attack": "",
+       "evidence": "192.168.99.100:3000"
+      },
+      {
+       "uri": "http://juice-shop:3000/rest/user/reset-password",
+       "method": "POST",
+       "param": "",
+       "attack": "",
+       "evidence": "172.20.0.3"
+      }
+     ]
+    },
+    {
+     "pluginid": "10096",
+     "alertRef": "10096",
+     "alert": "Timestamp Disclosure - Unix",
+     "name": "Timestamp Disclosure - Unix",
+     "riskcode": "1",
+     "confidence": "1",
+     "riskdesc": "Low (Low)",
+     "cweid": "497",
+     "wascid": "13",
+     "count": "4",
+     "desc": "<p>(recortado)</p>",
+     "solution": "<p>(recortado)</p>",
+     "instances": [
+      {
+       "uri": "http://juice-shop:3000/rest/admin/application-configuration",
+       "method": "GET",
+       "param": "",
+       "attack": "",
+       "evidence": "1969196030"
+      },
+      {
+       "uri": "http://juice-shop:3000/rest/admin/application-configuration",
+       "method": "GET",
+       "param": "",
+       "attack": "",
+       "evidence": "1970691216"
+      }
+     ]
+    },
+    {
+     "pluginid": "10021",
+     "alertRef": "10021",
+     "alert": "X-Content-Type-Options Header Missing",
+     "name": "X-Content-Type-Options Header Missing",
+     "riskcode": "1",
+     "confidence": "2",
+     "riskdesc": "Low (Medium)",
+     "cweid": "693",
+     "wascid": "15",
+     "count": "3",
+     "desc": "<p>(recortado)</p>",
+     "solution": "<p>(recortado)</p>",
+     "instances": [
+      {
+       "uri": "http://juice-shop:3000/socket.io/?EIO=4&transport=polling&t=m9wrqky5&sid=IOLQGShjJAZfEtkjAAAE",
+       "method": "GET",
+       "param": "x-content-type-options",
+       "attack": "",
+       "evidence": ""
+      },
+      {
+       "uri": "http://juice-shop:3000/socket.io/?EIO=4&transport=polling&t=m9wnxuyr",
+       "method": "GET",
+       "param": "x-content-type-options",
+       "attack": "",
+       "evidence": ""
+      }
+     ]
+    },
+    {
+     "pluginid": "120000",
+     "alertRef": "120000-2",
+     "alert": "Information Disclosure - Information in Browser sessionStorage",
+     "name": "Information Disclosure - Information in Browser sessionStorage",
+     "riskcode": "0",
+     "confidence": "3",
+     "riskdesc": "Informational (High)",
+     "cweid": "359",
+     "wascid": "13",
+     "count": "2",
+     "desc": "<p>(recortado)</p>",
+     "solution": "<p>(recortado)</p>",
+     "instances": [
+      {
+       "uri": "http://juice-shop:3000/#/",
+       "method": "GET",
+       "param": "guestBasket",
+       "attack": "",
+       "evidence": ""
+      },
+      {
+       "uri": "http://juice-shop:3000/#/basket",
+       "method": "GET",
+       "param": "itemTotal",
+       "attack": "",
+       "evidence": ""
+      }
+     ]
+    },
+    {
+     "pluginid": "10024",
+     "alertRef": "10024",
+     "alert": "Information Disclosure - Sensitive Information in URL",
+     "name": "Information Disclosure - Sensitive Information in URL",
+     "riskcode": "0",
+     "confidence": "2",
+     "riskdesc": "Informational (Medium)",
+     "cweid": "598",
+     "wascid": "13",
+     "count": "1",
+     "desc": "<p>(recortado)</p>",
+     "solution": "<p>(recortado)</p>",
+     "instances": [
+      {
+       "uri": "http://juice-shop:3000/rest/user/security-question?email=foo-bar@example.com",
+       "method": "GET",
+       "param": "email",
+       "attack": "",
+       "evidence": "foo-bar@example.com"
+      }
+     ]
+    },
+    {
+     "pluginid": "10109",
+     "alertRef": "10109",
+     "alert": "Modern Web Application",
+     "name": "Modern Web Application",
+     "riskcode": "0",
+     "confidence": "2",
+     "riskdesc": "Informational (Medium)",
+     "cweid": "-1",
+     "wascid": "-1",
+     "count": "5",
+     "desc": "<p>(recortado)</p>",
+     "solution": "<p>(recortado)</p>",
+     "instances": [
+      {
+       "uri": "http://juice-shop:3000",
+       "method": "GET",
+       "param": "",
+       "attack": "",
+       "evidence": "<script>\n    window.addEventListener(\"load\", function(){\n      window.cookieconsent.initialise({\n        \"palette\": {\n          \"popup\": { \"background\": \"var(--theme-primary)\", \"text\": \"var(--theme-text)\" },\n          \"button\": { \"background\": \"var(--theme-accent)\", \"text\": \"var(--theme-text)\" }\n        },\n        \"theme\": \"classic\",\n        \"position\": \"bottom-right\",\n        \"content\": { \"message\": \"This website uses fruit cookies to ensure you get the juiciest tracking experience.\", \"dismiss\": \"Me want it!\", \"link\": \"But me wait!\", \"href\": \"https://www.youtube.com/watch?v=9PnbKL3wuH4\" }\n      })});\n  </script>"
+      },
+      {
+       "uri": "http://juice-shop:3000/",
+       "method": "GET",
+       "param": "",
+       "attack": "",
+       "evidence": "<script>\n    window.addEventListener(\"load\", function(){\n      window.cookieconsent.initialise({\n        \"palette\": {\n          \"popup\": { \"background\": \"var(--theme-primary)\", \"text\": \"var(--theme-text)\" },\n          \"button\": { \"background\": \"var(--theme-accent)\", \"text\": \"var(--theme-text)\" }\n        },\n        \"theme\": \"classic\",\n        \"position\": \"bottom-right\",\n        \"content\": { \"message\": \"This website uses fruit cookies to ensure you get the juiciest tracking experience.\", \"dismiss\": \"Me want it!\", \"link\": \"But me wait!\", \"href\": \"https://www.youtube.com/watch?v=9PnbKL3wuH4\" }\n      })});\n  </script>"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "insights": [
+  {
+   "level": "Low",
+   "reason": "Exceeded Low",
+   "site": "",
+   "key": "insight.network.failure",
+   "description": "Percentage of network failures",
+   "statistic": "11"
+  }
+ ]
+}

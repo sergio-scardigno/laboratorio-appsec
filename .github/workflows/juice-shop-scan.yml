@@ -1,0 +1,75 @@
+name: Análisis de Juice Shop
+
+on:
+  workflow_dispatch:
+    inputs:
+      zap_mode:
+        description: Modo de ZAP
+        type: choice
+        options: [active, passive]
+        default: active
+  schedule:
+    - cron: "0 6 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: juice-shop-scan
+  cancel-in-progress: false
+
+jobs:
+  tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - run: make venv
+      - run: make test
+
+  scan:
+    needs: tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Preparar el host para SonarQube
+        run: sudo sysctl -w vm.max_map_count=524288
+      - name: Levantar el laboratorio
+        # Secretos y SonarQube son efímeros: mueren con el runner.
+        run: make venv env up sonar images rules
+      - name: Analizar Juice Shop
+        env:
+          ZAP_MODE: ${{ inputs.zap_mode || 'active' }}
+        run: |
+          if [ "$ZAP_MODE" = "active" ]; then
+            .venv/bin/lab scan --preset juice-shop --active
+          else
+            .venv/bin/lab scan --preset juice-shop
+          fi
+      - name: Resumen
+        if: always()
+        run: .venv/bin/python scripts/ci-summary.py >> "$GITHUB_STEP_SUMMARY"
+      - name: Subir el informe
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: informe-juice-shop
+          path: |
+            runs/*/report.html
+            runs/*/findings.json
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Logs de los servicios si algo falla
+        if: failure()
+        run: docker compose logs --tail=80 sonarqube

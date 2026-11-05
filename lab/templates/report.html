@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'nonce-{{ nonce }}'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<title>Informe {{ meta.target }}</title>
+<style>
+{% include "_tokens.css" %}
+.head { padding: 40px 0 20px; }
+.head .target { margin: 0 0 8px; color: var(--ink-2); overflow-wrap: anywhere; }
+.facts { display: flex; flex-wrap: wrap; gap: 4px 24px; margin: 12px 0 0; color: var(--ink-2); font-size: .9rem; }
+.banner { margin: 0 0 20px; }
+.banner ul { margin: 4px 0 0; padding-left: 1.1em; }
+.matrix-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--rule); }
+table.matrix { border-collapse: collapse; width: 100%; min-width: 760px; font-size: .95rem; }
+.matrix th, .matrix td { padding: 0; border-bottom: 1px solid var(--rule-2); text-align: left; vertical-align: middle; }
+.matrix thead th { font-weight: 600; font-size: .875rem; padding: 10px 12px; border-bottom: 1px solid var(--rule); }
+.matrix thead th.tool { text-align: center; width: 92px; }
+.matrix tbody th { font-weight: 400; padding: 10px 12px; }
+.matrix tbody th b { font-weight: 600; font-variant-numeric: tabular-nums; }
+.matrix tbody th small { display: block; color: var(--ink-2); font-size: .8rem; line-height: 1.35; margin-top: 2px; max-width: 46ch; }
+.matrix tr.unmapped th, .matrix tr.unmapped td { border-top: 2px solid var(--rule); }
+.cell { display: flex; align-items: center; justify-content: center; height: 100%; min-height: 62px; margin: 0 1px; font-variant-numeric: tabular-nums; font-size: 1.15rem; font-weight: 600; text-decoration: none; color: #14283c; }
+a.cell:hover { outline: 2px solid var(--accent); outline-offset: -2px; }
+.cell.light { color: #fff; }
+.cell.zero { color: var(--ink-2); font-weight: 400; }
+.cell.none, .cell.failed { font-size: .75rem; font-weight: 400; line-height: 1.2; text-align: center; padding: 4px; color: var(--ink-2); }
+.cell.none { background: repeating-linear-gradient(45deg, transparent 0 5px, var(--hatch) 5px 6px); }
+.cell.failed { color: var(--critical); font-weight: 600; background: repeating-linear-gradient(135deg, transparent 0 5px, var(--banner-bg) 5px 8px); }
+.matrix td.tool { height: 62px; }
+.sevcol { padding: 8px 12px !important; width: 210px; }
+.bar { display: flex; gap: 2px; height: 10px; margin-bottom: 4px; }
+.bar span { display: block; min-width: 3px; }
+.bar span:first-child { border-radius: 4px 0 0 4px; } .bar span:last-child { border-radius: 0 4px 4px 0; }
+.bar span:only-child { border-radius: 4px; }
+.b-critical { background: var(--critical); } .b-high { background: var(--serious); } .b-medium { background: var(--warning); }
+.b-low { background: var(--quiet); } .b-info { background: var(--rule); }
+.barnum { font-size: .8rem; color: var(--ink-2); }
+.cov { padding: 8px 12px !important; font-size: .85rem; width: 86px; }
+.cov-escasa { font-weight: 600; }
+.legend { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 22px; padding: 12px 0 0; font-size: .85rem; color: var(--ink-2); }
+.legend .key { display: inline-flex; align-items: center; gap: 6px; }
+.swatches { display: inline-flex; gap: 2px; }
+.swatches span { min-width: 36px; padding: 0 3px; height: 18px; font-size: .65rem; line-height: 18px; white-space: nowrap; text-align: center; color: #14283c; font-variant-numeric: tabular-nums; }
+.swatches span.light { color: #fff; }
+.chip { display: inline-block; width: 26px; height: 18px; }
+.chip.none { background: repeating-linear-gradient(45deg, transparent 0 5px, var(--hatch) 5px 6px); border: 1px solid var(--rule); }
+.notes { max-width: 72ch; margin: 18px 0 0; font-size: .9rem; color: var(--ink-2); }
+.notes p { margin: 6px 0; }
+.tools-run { margin-top: 44px; }
+.tools-run table { border-collapse: collapse; width: 100%; font-size: .9rem; margin-top: 10px; }
+.tools-run th, .tools-run td { text-align: left; padding: 7px 14px 7px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.tools-run th { font-weight: 600; }
+.tools-run .scroll { overflow-x: auto; }
+.list { margin-top: 44px; padding-bottom: 64px; }
+.filters { position: sticky; top: 0; z-index: 2; background: var(--paper); display: flex; flex-wrap: wrap; gap: 8px 14px; padding: 12px 0; border-bottom: 1px solid var(--rule); margin-top: 8px; align-items: center; }
+.filters label { font-size: .875rem; display: inline-flex; align-items: center; gap: 6px; }
+.filters select, .filters input[type=search] { font: inherit; font-size: .875rem; padding: 5px 7px; color: var(--ink); background: var(--surface); border: 1px solid var(--rule); border-radius: 3px; max-width: 100%; }
+.filters output { margin-left: auto; font-size: .875rem; color: var(--ink-2); }
+.cat { margin-top: 26px; scroll-margin-top: 80px; }
+.cat h3 { font: 500 1.15rem/1.3 var(--serif); margin-bottom: 6px; }
+.finding { background: var(--surface); border: 1px solid var(--rule); border-top-width: 0; }
+.cat h3 + .finding, .finding.first { border-top-width: 1px; }
+.finding summary { display: grid; grid-template-columns: 96px minmax(0, 1fr) auto; gap: 2px 12px; padding: 9px 12px; cursor: pointer; align-items: baseline; list-style: none; }
+.finding summary::-webkit-details-marker { display: none; }
+.finding summary:hover { background: var(--rule-2); }
+.f-title { font-weight: 500; overflow-wrap: anywhere; }
+.f-where { grid-column: 2 / 4; font-size: .82rem; color: var(--ink-2); overflow-wrap: anywhere; }
+.f-tools { font-size: .8rem; color: var(--ink-2); white-space: nowrap; }
+.tag { font-size: .75rem; border: 1px solid var(--rule); border-radius: 3px; padding: 0 5px; margin-left: 6px; font-weight: 400; color: var(--ink-2); white-space: nowrap; }
+.body { padding: 2px 12px 14px 120px; font-size: .9rem; max-width: 92ch; }
+.body p { margin: 8px 0; overflow-wrap: anywhere; }
+.body pre { background: var(--paper); padding: 8px 10px; overflow-x: auto; margin: 8px 0; font: .82rem/1.45 var(--code); }
+.body .inst { width: 100%; border-collapse: collapse; font-size: .82rem; margin: 8px 0; }
+.body .inst td, .body .inst th { text-align: left; border-bottom: 1px solid var(--rule-2); padding: 3px 8px 3px 0; overflow-wrap: anywhere; vertical-align: top; }
+.empty { color: var(--ink-2); font-size: .9rem; margin: 2px 0 0; }
+.hidden { display: none !important; }
+@media (max-width: 640px) {
+  .finding summary { grid-template-columns: minmax(0, 1fr) auto; }
+  .f-title { grid-column: 1 / 3; grid-row: 2; }
+  .f-where { grid-column: 1 / 3; }
+  .body { padding-left: 12px; }
+  .filters { position: static; }
+}
+@media print { .filters { display: none; } .finding .body { display: block; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="head">
+    <p class="target">{{ meta.target }}</p>
+    <h1>{{ headline }}</h1>
+    <p class="facts">
+      <span>Estado: {{ status_labels[meta.status] }}</span>
+      <span>ZAP: {% if results.zap.status == "skipped" %}no se ejecutó{% elif meta.request.active %}modo activo{% else %}modo pasivo{% endif %}</span>
+      <span>Duración: {{ (meta.duration_s / 60) | round(1) }} min</span>
+      <span>Fecha: {{ meta.generated_at[:16] | replace("T", " ") }} UTC</span>
+    </p>
+  </header>
+
+  {% set failed = results.values() | selectattr("status", "equalto", "error") | list %}
+  {% if failed %}
+  <div class="banner" role="alert">
+    <strong>Resultado incompleto: {{ failed | map(attribute="tool") | map("replace", "sonar", "SonarQube") | join(", ") }} no terminó bien.</strong>
+    Lo que esa herramienta debía ver no está en este informe. Una categoría con pocos hallazgos no significa que esté limpia.
+    <ul>{% for r in failed %}<li>{{ tool_labels[r.tool] }}: {{ r.message or "sin detalle" }}</li>{% endfor %}</ul>
+  </div>
+  {% endif %}
+
+  <div class="matrix-wrap">
+    <table class="matrix">
+      <caption class="hidden">Hallazgos por categoría del OWASP Top 10:2025 y por herramienta</caption>
+      <thead>
+        <tr>
+          <th scope="col">Categoría OWASP Top 10:2025</th>
+          {% for tool in tools %}<th scope="col" class="tool">{{ tool_labels[tool] }}</th>{% endfor %}
+          <th scope="col">Gravedad</th>
+          <th scope="col">Alcance</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for row in matrix %}
+        <tr{% if row.id == unmapped %} class="unmapped"{% endif %}>
+          <th scope="row">
+            {% if row.id == unmapped %}<b>Sin mapear</b>{% else %}<b>{{ row.id.split(":")[0] }}</b> {{ row.name }}{% endif %}
+            <small>{{ row.coverage_note }}</small>
+          </th>
+          {% for cell in row.cells %}
+          <td class="tool">
+            {% if cell.state == "skipped" %}
+              <span class="cell none">no se ejecutó</span>
+            {% elif cell.state == "error" and not cell.count %}
+              <span class="cell failed">falló</span>
+            {% elif cell.count %}
+              <a class="cell{% if cell.light %} light{% endif %}" style="background:{{ cell.background }}" href="#cat-{{ row.slug }}" data-cat="{{ row.slug }}" data-tool="{{ cell.tool }}" title="{{ cell.count }} de {{ tool_labels[cell.tool] }} en {{ row.id }}">{{ cell.count }}</a>
+            {% else %}
+              <span class="cell zero" title="{{ tool_labels[cell.tool] }} se ejecutó y no encontró nada aquí">0</span>
+            {% endif %}
+          </td>
+          {% endfor %}
+          <td class="sevcol">
+            {% if row.total %}
+            <div class="bar" role="img" aria-label="{% for s, n in row.severity %}{{ severity_labels[s] }}: {{ n }}. {% endfor %}">
+              {% for s, n in row.severity %}<span class="b-{{ s }}" style="flex:{{ n }}" title="{{ severity_labels[s] }}: {{ n }}"></span>{% endfor %}
+            </div>
+            <span class="barnum">{{ row.total }} en total{% if row.review %}, {{ row.review }} por revisar{% endif %}</span>
+            {% else %}<span class="barnum">Sin hallazgos</span>{% endif %}
+          </td>
+          <td class="cov cov-{{ row.coverage }}">{{ row.coverage_label or "—" }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="legend">
+    <span class="key">Hallazgos
+      <span class="swatches">
+        <span style="background:{{ ramp[0][1] }}">1-2</span><span style="background:{{ ramp[1][1] }}">3-5</span><span style="background:{{ ramp[2][1] }}">6-15</span><span class="light" style="background:{{ ramp[3][1] }}">16-40</span><span class="light" style="background:{{ ramp[4][1] }}">41+</span>
+      </span>
+    </span>
+    <span class="key"><span class="chip none"></span> La herramienta no se ejecutó</span>
+    <span class="key">Gravedad
+      {% for s in severities %}<span class="sev sev-{{ s }}"><i>{{ severity_icons[s] }}</i>{{ severity_labels[s] }}</span> {% endfor %}
+    </span>
+  </div>
+
+  <div class="notes">
+    <p>Un cero significa que la herramienta miró y no encontró nada, no que no haya problemas. La columna Alcance dice cuánto pueden ver estas herramientas en cada categoría; es una valoración de este laboratorio, no de OWASP.</p>
+    <p>El mapeo sale del CWE de cada hallazgo y de la tabla oficial de OWASP. Un hallazgo con varios CWE cuenta en cada categoría que le corresponde, así que las filas suman más que el total. Si dos herramientas coinciden en archivo, CWE y línea (±3), cuenta como un hallazgo para ambas.</p>
+    {% if results.zap.status != "skipped" and meta.correlated %}<p>{% if meta.correlated == 1 %}1 hallazgo de ZAP comparte{% else %}{{ meta.correlated }} hallazgos de ZAP comparten{% endif %} CWE con alguno de código. Es una correlación probable, no una confirmación de que sean el mismo fallo.</p>{% endif %}
+  </div>
+
+  <section class="tools-run">
+    <h2>Cómo fue cada herramienta</h2>
+    <div class="scroll">
+    <table>
+      <thead><tr><th scope="col">Herramienta</th><th scope="col">Estado</th><th scope="col">Duración</th><th scope="col">Crudos</th><th scope="col">En el informe</th><th scope="col">Descartados</th></tr></thead>
+      <tbody>
+      {% for tool in tools %}
+        {% set r = results[tool] %}{% set st = meta.stats.get(tool) %}
+        <tr>
+          <th scope="row">{{ tool_labels[tool] }}</th>
+          <td>{% if r.status == "ok" %}Correcto{% elif r.status == "error" %}Falló{% else %}No se ejecutó{% endif %}{% if tool == "zap" and r.details.get("mode") %} ({{ "activo" if r.details.mode == "full" else "pasivo" }}{% if r.details.get("urls") %}, {{ r.details.urls }} URL{% endif %}){% endif %}</td>
+          <td>{% if r.status != "skipped" %}{{ (r.duration_s / 60) | round(1) }} min{% else %}—{% endif %}</td>
+          <td>{{ st.raw if st else "—" }}</td>
+          <td>{{ st.normalized if st else "—" }}</td>
+          <td>{% if st and st.discarded %}{{ st.discarded | length }}: {{ st.discarded[0].reason }}{% elif st %}0{% else %}—{% endif %}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+    {% if meta.warnings or meta.merged %}
+    <div class="notes">
+      {% if meta.merged %}<p>{% if meta.merged == 1 %}1 hallazgo se ha fusionado{% else %}{{ meta.merged }} hallazgos se han fusionado{% endif %} con el de otra herramienta, por eso el total es menor que la suma.</p>{% endif %}
+      {% for w in meta.warnings %}<p>Aviso: {{ w }}.</p>{% endfor %}
+      {% if meta.removed_control_files %}<p>Se quitaron del análisis los archivos con los que el repo podía ocultar código a los escáneres: {{ meta.removed_control_files | join(", ") }}.</p>{% endif %}
+    </div>
+    {% endif %}
+  </section>
+
+  <section class="list" id="hallazgos">
+    <h2>Hallazgos</h2>
+    <form class="filters" id="filters" onsubmit="return false" hidden>
+      <label>Herramienta
+        <select id="f-tool"><option value="">Todas</option>{% for tool in tools %}<option value="{{ tool }}">{{ tool_labels[tool] }}</option>{% endfor %}</select>
+      </label>
+      <label>Gravedad
+        <select id="f-sev"><option value="">Todas</option>{% for s in severities %}<option value="{{ s }}">{{ severity_labels[s] }}</option>{% endfor %}</select>
+      </label>
+      <label>Categoría
+        <select id="f-cat"><option value="">Todas</option>{% for row in matrix %}{% if row.total %}<option value="{{ row.slug }}">{{ row.id }}</option>{% endif %}{% endfor %}</select>
+      </label>
+      <label><input type="checkbox" id="f-review"> Solo por revisar</label>
+      <label>Buscar <input type="search" id="f-q" placeholder="archivo, regla, CWE"></label>
+      <output id="f-count" aria-live="polite"></output>
+    </form>
+
+    {% for row in matrix %}
+    {% if row.total %}
+    <div class="cat" id="cat-{{ row.slug }}" data-slug="{{ row.slug }}">
+      <h3>{% if row.id == unmapped %}Sin mapear{% else %}{{ row.id }} {{ row.name }}{% endif %}</h3>
+      {% for f in row.findings %}
+      <details class="finding" data-tools="{{ f.tools | join(' ') }}" data-sev="{{ f.severity }}" data-review="{{ 1 if f.review_required else 0 }}" data-fp="{{ f.fingerprint }}">
+        <summary>
+          <span class="sev sev-{{ f.severity }}"><i>{{ severity_icons[f.severity] }}</i>{{ severity_labels[f.severity] }}</span>
+          <span class="f-title">{{ f.title }}{% if f.review_required %}<span class="tag">por revisar</span>{% endif %}</span>
+          <span class="f-tools">{% for t in f.tools %}{{ tool_labels[t] }}{% if not loop.last %} y {% endif %}{% endfor %}</span>
+          <span class="f-where">
+            {% if f.file %}<span class="code">{{ f.file }}{% if f.line %}:{{ f.line }}{% endif %}</span>
+            {% elif f.instance_count %}{{ f.instance_count }} {{ "URL" if f.instance_count == 1 else "URL distintas" }}{% endif %}
+            {% if f.cwes %}<span> CWE-{{ f.cwes | join(", CWE-") }}</span>{% endif %}
+          </span>
+        </summary>
+        <div class="body">
+          {% if f.message %}<p>{{ f.message }}</p>{% endif %}
+          {% if f.snippet %}<pre><code>{{ f.snippet }}</code></pre>{% endif %}
+          {% if f.review_required %}<p class="muted">La regla detecta un patrón que puede ser correcto según el contexto. Una persona debe confirmar si es un problema real.</p>{% endif %}
+          {% if f.also_found_by %}<p>También lo detecta {% for a in f.also_found_by %}{{ tool_labels[a.tool] }} (<code>{{ a.rule_id }}</code>, línea {{ a.line }}){% if not loop.last %}, {% endif %}{% endfor %}.</p>{% endif %}
+          {% if f.owasp_disagrees %}<p class="muted">La regla se declara en {{ f.tool_owasp | join(", ") }}, pero su CWE corresponde a {{ f.categories | join(", ") }} según la tabla de OWASP. El informe usa la tabla.</p>{% elif row.id == unmapped and f.tool_owasp %}<p class="muted">La regla se declara en {{ f.tool_owasp | join(", ") }}, pero ese CWE no está en la tabla oficial de 2025.</p>{% endif %}
+          {% if f.instances %}
+          <table class="inst"><thead><tr><th scope="col">URL</th><th scope="col">Método</th><th scope="col">Parámetro</th><th scope="col">Evidencia</th></tr></thead><tbody>
+          {% for i in f.instances %}<tr><td><a href="{{ i.url | safe_url }}" rel="noreferrer noopener" target="_blank">{{ i.url }}</a></td><td>{{ i.method }}</td><td>{{ i.param }}</td><td><code>{{ i.evidence }}</code></td></tr>{% endfor %}
+          </tbody></table>
+          {% if f.instance_count > f.instances | length %}<p class="muted">Se muestran {{ f.instances | length }} de {{ f.instance_count }}. El resto está en findings.json.</p>{% endif %}
+          {% endif %}
+          {% if f.solution %}<p><strong>Cómo corregirlo:</strong> {{ f.solution }}</p>{% endif %}
+          <p class="muted">Regla: <code>{{ f.rule_id }}</code>{% if f.confidence %}. Confianza: {{ f.confidence }}{% endif %}{% for c in f.cwes %}. <a href="https://cwe.mitre.org/data/definitions/{{ c }}.html" rel="noreferrer noopener" target="_blank">CWE-{{ c }}</a>{% endfor %}</p>
+        </div>
+      </details>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endfor %}
+    {% if not findings_count %}<p class="empty">No hay hallazgos que mostrar.</p>{% endif %}
+  </section>
+</div>
+
+<script nonce="{{ nonce }}">
+(function () {
+  var form = document.getElementById('filters');
+  if (!form || !document.querySelector('.finding')) return;
+  form.hidden = false;
+  var tool = document.getElementById('f-tool'), sev = document.getElementById('f-sev'),
+      cat = document.getElementById('f-cat'), review = document.getElementById('f-review'),
+      q = document.getElementById('f-q'), count = document.getElementById('f-count');
+  var cats = Array.prototype.slice.call(document.querySelectorAll('.cat'));
+  function apply() {
+    var needle = q.value.trim().toLowerCase(), seen = {};
+    cats.forEach(function (group) {
+      var any = false;
+      var catOk = !cat.value || group.dataset.slug === cat.value;
+      group.querySelectorAll('.finding').forEach(function (f) {
+        var ok = catOk
+          && (!tool.value || f.dataset.tools.split(' ').indexOf(tool.value) >= 0)
+          && (!sev.value || f.dataset.sev === sev.value)
+          && (!review.checked || f.dataset.review === '1')
+          && (!needle || f.textContent.toLowerCase().indexOf(needle) >= 0);
+        f.classList.toggle('hidden', !ok);
+        if (ok) { any = true; seen[f.dataset.fp] = true; }
+      });
+      group.classList.toggle('hidden', !any);
+    });
+    var n = Object.keys(seen).length;
+    count.textContent = n + (n === 1 ? ' hallazgo' : ' hallazgos');
+  }
+  [tool, sev, cat, review, q].forEach(function (el) { el.addEventListener('input', apply); });
+  document.querySelectorAll('a.cell').forEach(function (a) {
+    a.addEventListener('click', function () {
+      tool.value = a.dataset.tool; cat.value = a.dataset.cat; sev.value = ''; review.checked = false; q.value = '';
+      apply();
+    });
+  });
+  apply();
+})();
+</script>
+</body>
+</html>
