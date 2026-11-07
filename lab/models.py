@@ -7,8 +7,9 @@ SEVERITIES = ["critical", "high", "medium", "low", "info"]
 SEVERITY_LABELS = {
     "critical": "Crítica", "high": "Alta", "medium": "Media", "low": "Baja", "info": "Informativa",
 }
-TOOLS = ["semgrep", "sonar", "zap"]
-SAST_TOOLS = {"semgrep", "sonar"}
+TOOLS = ["semgrep", "sonar", "trivy", "zap"]
+# Las que analizan código o artefactos, sin ejecutar la aplicación.
+SAST_TOOLS = {"semgrep", "sonar", "trivy"}
 
 
 @dataclass
@@ -35,6 +36,9 @@ class Finding:
     line: int = 0
     solution: str = ""
     snippet: str = ""
+    # Enlace al aviso de seguridad y CWE que este declara (dependencias vulnerables).
+    reference: str = ""
+    advisory_cwes: list[int] = field(default_factory=list)
     # True: la herramienta pide que una persona confirme si es un problema real.
     review_required: bool = False
     instances: list[Instance] = field(default_factory=list)

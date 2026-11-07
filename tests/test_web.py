@@ -106,7 +106,7 @@ def test_events_endpoint_reports_stages(logged):
     run_id = response.headers["location"].rsplit("/", 1)[-1]
     data = logged.get(f"/runs/{run_id}/events.json").json()
     assert data["finished"] is False
-    assert [s["id"] for s in data["stages"]] == ["source", "semgrep", "sonar", "zap", "report"]
+    assert [s["id"] for s in data["stages"]] == ["source", "semgrep", "sonar", "trivy", "zap", "report"]
 
 
 def test_interrupted_runs_are_marked_on_start(tmp_path):

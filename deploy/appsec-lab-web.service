@@ -1,6 +1,4 @@
-# Sustituye TU_USUARIO y /ruta/a/appsec-lab, y después instala como root:
-#   cp deploy/appsec-lab-web.service /etc/systemd/system/
-#   systemctl daemon-reload && systemctl enable --now appsec-lab-web
+# Plantilla: la instala scripts/install-web-service.sh, que rellena el usuario y la ruta.
 [Unit]
 Description=Laboratorio AppSec (web)
 After=docker.service
@@ -10,7 +8,7 @@ Requires=docker.service
 User=TU_USUARIO
 SupplementaryGroups=docker
 WorkingDirectory=/ruta/a/appsec-lab
-ExecStart=/ruta/a/appsec-lab/.venv/bin/lab web
+ExecStart=/ruta/a/appsec-lab/.venv/bin/lab web --no-link
 Restart=on-failure
 NoNewPrivileges=true
 

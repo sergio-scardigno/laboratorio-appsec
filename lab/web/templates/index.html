@@ -1,7 +1,7 @@
 {% extends "_layout.html" %}
 {% block body %}
 <h1>Analiza una web o un repo</h1>
-<p class="lead">Semgrep y SonarQube leen el código, ZAP prueba la web, y los hallazgos se agrupan por categoría del OWASP Top 10:2025.</p>
+<p class="lead">Semgrep y SonarQube leen el código, Trivy busca dependencias vulnerables y secretos, ZAP prueba la web, y los hallazgos se agrupan por categoría del OWASP Top 10:2025.</p>
 {% if error %}<div class="banner error" role="alert"><strong>No se ha lanzado el análisis.</strong> {{ error }}</div>{% endif %}
 {% if not sonar_ready %}<div class="banner error" role="alert"><strong>SonarQube no está configurado.</strong> Ejecuta <code>make sonar</code> o ese paso fallará.</div>{% endif %}
 
@@ -23,7 +23,7 @@
     <h2>Tu propio objetivo</h2>
     <form method="post" action="/scans">
       <div class="field">
-        <label for="repo">Repo público</label>
+        <label for="repo">Repo</label>
         <input id="repo" name="repo" type="url" placeholder="https://github.com/usuario/proyecto" value="{{ form.repo or '' }}">
         <small>Solo se lee: nunca se compila ni se ejecuta.</small>
       </div>

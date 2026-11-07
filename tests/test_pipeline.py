@@ -73,11 +73,15 @@ REAL_PREPARE_SOURCE = pipeline._prepare_source
 
 
 @pytest.fixture
-def lab(tmp_path, monkeypatch, semgrep_raw, sonar_raw, zap_raw):
+def lab(tmp_path, monkeypatch, semgrep_raw, sonar_raw, trivy_raw, zap_raw):
     settings = Settings(tmp_path, tmp_path / "runs", tmp_path / "rules", "http://x", "tok", "web")
     settings.runs_dir.mkdir()
 
-    def fake_source(request, dest, github_token=""):
+    def fake_trivy(src, out, run_id, image_ref=None):
+        (out / "trivy.json").write_text(json.dumps(trivy_raw))
+        return ToolResult("trivy", "ok", 1, ["trivy.json"], details={"image": image_ref or ""})
+
+    def fake_source(request, dest, github_token="", warnings=None):
         dest.mkdir()
         return []
 
@@ -97,6 +101,7 @@ def lab(tmp_path, monkeypatch, semgrep_raw, sonar_raw, zap_raw):
     monkeypatch.setattr(pipeline.semgrep, "run", fake_semgrep)
     monkeypatch.setattr(pipeline.sonar, "run", fake_sonar)
     monkeypatch.setattr(pipeline.zap, "run", fake_zap)
+    monkeypatch.setattr(pipeline.trivy, "run", fake_trivy)
     monkeypatch.setattr(pipeline, "restart_juice_shop", lambda root: None)
     return settings, Store(settings.db_path)
 
@@ -157,7 +162,7 @@ def test_unparseable_output_is_an_error_not_an_empty_result(lab, monkeypatch):
 def test_clone_failure_is_reported(lab, monkeypatch):
     settings, store = lab
 
-    def fail(request, dest, github_token=""):
+    def fail(request, dest, github_token="", warnings=None):
         raise pipeline.source.SourceError("repo inexistente")
 
     monkeypatch.setattr(pipeline, "_prepare_source", fail)
@@ -202,3 +207,73 @@ def test_github_token_reaches_clone_but_is_never_recorded(lab, monkeypatch):
         if path.is_file():
             assert "ghp_secreto" not in path.read_text(errors="replace")
     assert "ghp_secreto" not in json.dumps(store.get_run(result["run_id"]))
+
+
+def test_trivy_runs_with_the_code_and_scans_the_image_only_for_the_preset(lab, monkeypatch):
+    settings, store = lab
+    seen = []
+    real = pipeline.trivy.run
+
+    def spy(src, out, run_id, image_ref=None):
+        seen.append(image_ref)
+        return real(src, out, run_id, image_ref=image_ref)
+
+    monkeypatch.setattr(pipeline.trivy, "run", spy)
+    execute(ScanRequest(preset="juice-shop"), settings, store)
+    execute(ScanRequest(repo="https://github.com/a/b"), settings, store)
+    assert seen == [pipeline.images.JUICE_SHOP_IMAGE, None]
+
+
+def test_trivy_findings_reach_the_report(lab):
+    settings, store = lab
+    result = execute(ScanRequest(preset="juice-shop"), settings, store)
+    assert result["summary"]["tools"]["trivy"]["status"] == "ok"
+    data = json.loads((settings.runs_dir / result["run_id"] / "findings.json").read_text())
+    assert any(f["tool"] == "trivy" and f["categories"] == ["A03:2025"] for f in data["findings"])
+    html = (settings.runs_dir / result["run_id"] / "report.html").read_text()
+    assert "Trivy" in html and "Aviso de seguridad" in html and "no trae lockfile" in html
+
+
+def test_trivy_failure_makes_the_run_partial(lab, monkeypatch):
+    settings, store = lab
+
+    def boom(*a, **k):
+        raise RuntimeError("Trivy cayó")
+
+    monkeypatch.setattr(pipeline.trivy, "run", boom)
+    result = execute(ScanRequest(preset="juice-shop"), settings, store)
+    assert result["status"] == "partial"
+    html = (settings.runs_dir / result["run_id"] / "report.html").read_text()
+    assert "Resultado incompleto" in html and "Trivy cayó" in html
+
+
+def test_url_only_does_not_run_trivy(lab):
+    settings, store = lab
+    result = execute(ScanRequest(url="https://example.com", authorized=True), settings, store)
+    assert result["summary"]["tools"]["trivy"]["status"] == "skipped"
+
+
+def test_clone_failure_also_marks_trivy(lab, monkeypatch):
+    settings, store = lab
+
+    def fail(request, dest, github_token="", warnings=None):
+        raise pipeline.source.SourceError("repo inexistente")
+
+    monkeypatch.setattr(pipeline, "_prepare_source", fail)
+    result = execute(ScanRequest(repo="https://github.com/a/b"), settings, store)
+    assert result["summary"]["tools"]["trivy"]["status"] == "error"
+
+
+def test_rejected_token_warning_reaches_the_report(lab, monkeypatch):
+    settings, store = lab
+
+    def source_with_warning(request, dest, github_token="", warnings=None):
+        dest.mkdir()
+        warnings.append("GitHub rechazó LAB_GITHUB_TOKEN")
+        return []
+
+    monkeypatch.setattr(pipeline, "_prepare_source", source_with_warning)
+    result = execute(ScanRequest(repo="https://github.com/a/b"), settings, store)
+    assert result["status"] == "ok"
+    html = (settings.runs_dir / result["run_id"] / "report.html").read_text()
+    assert "GitHub rechazó LAB_GITHUB_TOKEN" in html

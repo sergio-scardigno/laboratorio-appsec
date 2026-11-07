@@ -15,10 +15,10 @@ from urllib.parse import urlparse
 
 from lab import images, source
 from lab.dedupe import correlate, merge_sast
-from lab.models import SEVERITIES, Finding, ParseResult
-from lab.normalize import attach_snippets, parse_semgrep, parse_sonar, parse_zap
+from lab.models import SEVERITIES, TOOLS, Finding, ParseResult
+from lab.normalize import attach_snippets, parse_semgrep, parse_sonar, parse_trivy, parse_zap
 from lab.report import write_report
-from lab.runners import semgrep, sonar, zap
+from lab.runners import semgrep, sonar, trivy, zap
 from lab.runners.base import ToolResult
 from lab.settings import Settings
 from lab.store import Store
@@ -49,9 +49,13 @@ class ScanRequest:
     # Declaraciones de quien lanza el análisis; quedan registradas en la ejecución.
     authorized: bool = False
     active_confirmed: bool = False
+    # Nombre a mostrar en lugar de la ruta local (la puerta antes del push).
+    label: str = ""
 
     @property
     def target(self) -> str:
+        if self.label:
+            return self.label
         if self.preset == PRESET_JUICE_SHOP:
             return f"OWASP Juice Shop {images.JUICE_SHOP_TAG}"
         return " + ".join(part for part in (self.repo or self.local_path, self.url) if part)
@@ -129,11 +133,15 @@ def restart_juice_shop(root: Path, timeout_s: int = 90) -> None:
     raise TimeoutError(f"Juice Shop no arrancó en {timeout_s}s")
 
 
-def _prepare_source(request: ScanRequest, dest: Path, github_token: str = "") -> list[str]:
+def _prepare_source(
+    request: ScanRequest, dest: Path, github_token: str = "", warnings: list[str] | None = None
+) -> list[str]:
     if request.preset:
         source.clone(images.JUICE_SHOP_REPO, dest, ref=images.JUICE_SHOP_TAG)
     elif request.repo:
-        source.clone(request.repo, dest, ref=request.ref or None, github_token=github_token)
+        warning = source.clone(request.repo, dest, ref=request.ref or None, github_token=github_token)
+        if warning and warnings is not None:
+            warnings.append(warning)
     else:
         source.copy_local(Path(request.local_path), dest)
     return source.sanitize(dest)
@@ -201,7 +209,8 @@ def _execute_locked(
     (out_dir / "request.json").write_text(json.dumps(asdict(request), indent=2))
     started = time.monotonic()
 
-    results = {name: ToolResult(name, "skipped") for name in ("semgrep", "sonar", "zap")}
+    results = {name: ToolResult(name, "skipped") for name in TOOLS}
+    source_warnings: list[str] = []
     parsed: list[ParseResult] = []
     src = out_dir / "src"
     source_ready = False
@@ -210,13 +219,13 @@ def _execute_locked(
     if request.runs_sast:
         event("source", "running", "Obteniendo el código")
         try:
-            removed = _prepare_source(request, src, settings.github_token)
+            removed = _prepare_source(request, src, settings.github_token, source_warnings)
             source_ready = True
             detail = f"Eliminados: {', '.join(removed)}" if removed else ""
             event("source", "ok", detail)
         except (source.SourceError, OSError) as exc:
             event("source", "error", str(exc))
-            for name in ("semgrep", "sonar"):
+            for name in ("semgrep", "sonar", "trivy"):
                 results[name] = ToolResult(name, "error", message=f"Sin código que analizar: {exc}")
 
     if source_ready:
@@ -236,6 +245,13 @@ def _execute_locked(
         if results["sonar"].status == "ok" and (p := _parse(results["sonar"], out_dir, parse_sonar)):
             parsed.append(p)
         event("sonar", results["sonar"].status, results["sonar"].message)
+
+        event("trivy", "running", "Actualizando la base y analizando dependencias y secretos")
+        image = images.JUICE_SHOP_IMAGE if request.preset else None
+        results["trivy"] = _safely("trivy", lambda: trivy.run(src, out_dir, run_id, image_ref=image))
+        if results["trivy"].status == "ok" and (p := _parse(results["trivy"], out_dir, parse_trivy)):
+            parsed.append(p)
+        event("trivy", results["trivy"].status, results["trivy"].message)
 
     if request.runs_dast:
         event("zap", "running", "Modo activo" if request.active else "Modo pasivo")
@@ -260,7 +276,7 @@ def _execute_locked(
     correlated = correlate(findings)
     findings.sort(key=lambda f: (SEVERITIES.index(f.severity), f.review_required, f.title))
 
-    warnings = [w for p in parsed for w in p.warnings]
+    warnings = source_warnings + [w for p in parsed for w in p.warnings]
     for p in parsed:
         if not p.reconciled:
             warnings.append(f"{p.tool}: los recuentos no cuadran y puede faltar algún hallazgo")

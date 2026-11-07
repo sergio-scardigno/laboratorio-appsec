@@ -43,3 +43,51 @@ def test_github_token_goes_in_env_scoped_to_github():
     assert env["GIT_CONFIG_KEY_0"] == "http.https://github.com/.extraheader"
     header = env["GIT_CONFIG_VALUE_0"].removeprefix("Authorization: Basic ")
     assert base64.b64decode(header).decode() == "x-access-token:tok"
+
+
+class FakeGit:
+    """Simula git: falla con credencial rechazada mientras reciba el token."""
+
+    def __init__(self, public: bool):
+        self.public, self.calls = public, []
+
+    def __call__(self, argv, env=None, **kwargs):
+        import subprocess
+
+        with_token = "GIT_CONFIG_KEY_0" in env
+        self.calls.append(with_token)
+        ok = self.public and not with_token
+        stderr = "" if ok else "fatal: could not read Username for 'https://github.com': terminal prompts disabled"
+        return subprocess.CompletedProcess(argv, 0 if ok else 128, "", stderr)
+
+
+def test_rejected_token_retries_without_it_for_public_repos(tmp_path, monkeypatch):
+    git = FakeGit(public=True)
+    monkeypatch.setattr(source.subprocess, "run", git)
+    warning = source.clone("https://github.com/a/b", tmp_path / "x", github_token="muerto")
+    assert git.calls == [True, False]
+    assert "rechazó LAB_GITHUB_TOKEN" in warning
+    assert "muerto" not in warning
+
+
+def test_rejected_token_on_a_private_repo_gives_a_clear_error(tmp_path, monkeypatch):
+    git = FakeGit(public=False)
+    monkeypatch.setattr(source.subprocess, "run", git)
+    with pytest.raises(source.SourceError, match="LAB_GITHUB_TOKEN") as exc:
+        source.clone("https://github.com/a/b", tmp_path / "x", github_token="muerto")
+    assert git.calls == [True, False]
+    assert "muerto" not in str(exc.value)
+
+
+def test_no_token_means_no_retry(tmp_path, monkeypatch):
+    git = FakeGit(public=False)
+    monkeypatch.setattr(source.subprocess, "run", git)
+    with pytest.raises(source.SourceError, match="token de solo lectura"):
+        source.clone("https://github.com/a/b", tmp_path / "x")
+    assert git.calls == [False]
+
+
+def test_trivy_control_files_are_removed(tmp_path):
+    for name in (".trivyignore", ".trivyignore.yaml", "trivy.yaml", "trivy-secret.yaml"):
+        (tmp_path / name).write_text("x")
+    assert len(source.sanitize(tmp_path)) == 4

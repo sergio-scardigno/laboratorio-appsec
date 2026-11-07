@@ -16,7 +16,7 @@ from lab.owasp import UNMAPPED, load_table
 from lab.runners.base import ToolResult
 
 TEMPLATES = Path(__file__).resolve().parent / "templates"
-TOOL_LABELS = {"semgrep": "Semgrep", "sonar": "SonarQube", "zap": "ZAP"}
+TOOL_LABELS = {"semgrep": "Semgrep", "sonar": "SonarQube", "trivy": "Trivy", "zap": "ZAP"}
 SEVERITY_ICONS = {"critical": "◆", "high": "▲", "medium": "●", "low": "○", "info": "·"}
 STATUS_LABELS = {"ok": "Completo", "partial": "Parcial", "error": "Con error"}
 # Rampa secuencial azul: (tope del tramo, fondo, usa texto claro).

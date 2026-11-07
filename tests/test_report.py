@@ -6,7 +6,7 @@ PAYLOAD = "<script>alert(1)</script>"
 
 
 def results(**overrides):
-    base = {name: ToolResult(name, "ok") for name in ("semgrep", "sonar", "zap")}
+    base = {name: ToolResult(name, "ok") for name in ("semgrep", "sonar", "trivy", "zap")}
     base.update(overrides)
     return base
 
@@ -49,7 +49,7 @@ def test_safe_url():
 
 def test_zero_skipped_and_failed_cells_are_different():
     rows = build_matrix([], results(sonar=ToolResult("sonar", "skipped"), zap=ToolResult("zap", "error")))
-    assert [c["state"] for c in rows[0]["cells"]] == ["ok", "skipped", "error"]
+    assert [c["state"] for c in rows[0]["cells"]] == ["ok", "skipped", "ok", "error"]
 
 
 def test_matrix_has_every_category_even_without_findings():
@@ -62,7 +62,7 @@ def test_matrix_has_every_category_even_without_findings():
 def test_merged_finding_counts_for_both_tools():
     merged = finding(tool="semgrep", also_found_by=[{"tool": "sonar", "rule_id": "x", "title": "x", "line": 1, "severity": "low"}])
     row = build_matrix([merged], results())[4]
-    assert {c["tool"]: c["count"] for c in row["cells"]} == {"semgrep": 1, "sonar": 1, "zap": 0}
+    assert {c["tool"]: c["count"] for c in row["cells"]} == {"semgrep": 1, "sonar": 1, "trivy": 0, "zap": 0}
     assert row["total"] == 1
 
 

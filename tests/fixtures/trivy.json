@@ -1,0 +1,286 @@
+{
+ "scans": [
+  {
+   "kind": "fs",
+   "label": "el repo",
+   "report": {
+    "Results": [
+     {
+      "Target": "frontend/src/app/app.guard.spec.ts",
+      "Class": "secret",
+      "Type": null,
+      "Secrets": [
+       {
+        "RuleID": "jwt-token",
+        "Category": "JWT",
+        "Severity": "MEDIUM",
+        "Title": "JWT token",
+        "StartLine": 46,
+        "EndLine": 46
+       }
+      ]
+     },
+     {
+      "Target": "frontend/src/app/last-login-ip/last-login-ip.component.spec.ts",
+      "Class": "secret",
+      "Type": null,
+      "Secrets": [
+       {
+        "RuleID": "jwt-token",
+        "Category": "JWT",
+        "Severity": "MEDIUM",
+        "Title": "JWT token",
+        "StartLine": 72,
+        "EndLine": 72
+       }
+      ]
+     },
+     {
+      "Target": "infrastructure/terraform/networking.tf",
+      "Class": "secret",
+      "Type": null,
+      "Secrets": [
+       {
+        "RuleID": "private-key",
+        "Category": "AsymmetricPrivateKey",
+        "Severity": "HIGH",
+        "Title": "Asymmetric Private Key",
+        "StartLine": 171,
+        "EndLine": 171
+       }
+      ]
+     },
+     {
+      "Target": "lib/insecurity.ts",
+      "Class": "secret",
+      "Type": null,
+      "Secrets": [
+       {
+        "RuleID": "private-key",
+        "Category": "AsymmetricPrivateKey",
+        "Severity": "HIGH",
+        "Title": "Asymmetric Private Key",
+        "StartLine": 21,
+        "EndLine": 21
+       }
+      ]
+     },
+     {
+      "Target": "terraform/networking.tf",
+      "Class": "secret",
+      "Type": null,
+      "Secrets": [
+       {
+        "RuleID": "private-key",
+        "Category": "AsymmetricPrivateKey",
+        "Severity": "HIGH",
+        "Title": "Asymmetric Private Key",
+        "StartLine": 171,
+        "EndLine": 171
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "kind": "image",
+   "label": "la imagen",
+   "report": {
+    "Results": [
+     {
+      "Target": "/scan/juice.tar (debian 13.7)",
+      "Class": "os-pkgs",
+      "Type": "debian",
+      "Vulnerabilities": [
+       {
+        "Title": "ca-certificates - security update",
+        "VulnerabilityID": "DSA-6572-1",
+        "PkgName": "ca-certificates",
+        "InstalledVersion": "20250419",
+        "FixedVersion": "20250419+deb13u1",
+        "Status": "fixed",
+        "Severity": "UNKNOWN"
+       },
+       {
+        "Title": "gcc-toolset-15-gcc: gcc: gcc-toolset-16: gcc: Denial of Service via use-after-free in binary heap erase_if",
+        "VulnerabilityID": "CVE-2026-102010",
+        "PkgName": "gcc-14-base",
+        "InstalledVersion": "14.2.0-19",
+        "Status": "affected",
+        "Severity": "MEDIUM",
+        "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-102010",
+        "CweIDs": [
+         "CWE-825"
+        ]
+       },
+       {
+        "Title": "gcc: Confirmed out-of-bounds read/write in libstdc++ parallel `std",
+        "VulnerabilityID": "CVE-2026-114690",
+        "PkgName": "gcc-14-base",
+        "InstalledVersion": "14.2.0-19",
+        "Status": "affected",
+        "Severity": "MEDIUM",
+        "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-114690",
+        "CweIDs": [
+         "CWE-787"
+        ]
+       },
+       {
+        "Title": "gcc-toolset-15-gcc: gcc: gcc-toolset-16: gcc: Denial of Service via use-after-free in binary heap erase_if",
+        "VulnerabilityID": "CVE-2026-102010",
+        "PkgName": "gcc-14-base",
+        "InstalledVersion": "14.2.0-19",
+        "Status": "affected",
+        "Severity": "MEDIUM",
+        "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-102010",
+        "CweIDs": [
+         "CWE-825"
+        ]
+       },
+       {
+        "Title": "ca-certificates - security update",
+        "VulnerabilityID": "DSA-6572-1",
+        "PkgName": "ca-certificates",
+        "InstalledVersion": "20250419",
+        "FixedVersion": "20250419+deb13u1",
+        "Status": "fixed",
+        "Severity": "UNKNOWN"
+       }
+      ]
+     },
+     {
+      "Target": "Node.js",
+      "Class": "lang-pkgs",
+      "Type": "node-pkg",
+      "Vulnerabilities": [
+       {
+        "Title": "@tootallnate/once: @tootallnate/once: Denial of Service due to incorrect control flow scoping with AbortSignal",
+        "VulnerabilityID": "CVE-2026-3449",
+        "PkgName": "@tootallnate/once",
+        "PkgPath": "juice-shop/node_modules/@tootallnate/once/package.json",
+        "InstalledVersion": "1.1.2",
+        "FixedVersion": "3.0.1, 2.0.1",
+        "Status": "fixed",
+        "Severity": "LOW",
+        "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-3449",
+        "CweIDs": [
+         "CWE-705"
+        ]
+       },
+       {
+        "Title": "Out-of-bounds Read",
+        "VulnerabilityID": "NSWG-ECO-428",
+        "PkgName": "base64url",
+        "PkgPath": "juice-shop/node_modules/base64url/package.json",
+        "InstalledVersion": "0.0.6",
+        "FixedVersion": ">=3.0.0",
+        "Status": "fixed",
+        "Severity": "HIGH",
+        "PrimaryURL": "https://hackerone.com/reports/321687"
+       },
+       {
+        "Title": "Out-of-bounds Read in base64url",
+        "VulnerabilityID": "GHSA-rvg8-pwq2-xj7q",
+        "PkgName": "base64url",
+        "PkgPath": "juice-shop/node_modules/base64url/package.json",
+        "InstalledVersion": "0.0.6",
+        "FixedVersion": "3.0.0",
+        "Status": "fixed",
+        "Severity": "MEDIUM",
+        "PrimaryURL": "https://github.com/advisories/GHSA-rvg8-pwq2-xj7q"
+       },
+       {
+        "Title": "@xhmikosr/decompress: @xhmikosr/decompress: Path traversal via symlink chain",
+        "VulnerabilityID": "CVE-2026-101894",
+        "PkgName": "decompress",
+        "PkgPath": "juice-shop/node_modules/decompress/package.json",
+        "InstalledVersion": "4.2.1",
+        "Status": "affected",
+        "Severity": "CRITICAL",
+        "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-101894",
+        "CweIDs": [
+         "CWE-22",
+         "CWE-59"
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "kind": "fs",
+   "label": "lockfile",
+   "report": {
+    "Results": [
+     {
+      "Target": "package-lock.json",
+      "Class": "lang-pkgs",
+      "Type": "npm",
+      "Vulnerabilities": [
+       {
+        "Title": "body-parser: Denial of Service Vulnerability in body-parser",
+        "VulnerabilityID": "CVE-2024-45590",
+        "PkgName": "body-parser",
+        "InstalledVersion": "1.18.3",
+        "FixedVersion": "1.20.3",
+        "Status": "fixed",
+        "Severity": "HIGH",
+        "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2024-45590",
+        "CweIDs": [
+         "CWE-405"
+        ]
+       },
+       {
+        "Title": "body-parser: body-parser: Denial of Service via unhandled decompression stream error",
+        "VulnerabilityID": "CVE-2026-111181",
+        "PkgName": "body-parser",
+        "InstalledVersion": "1.18.3",
+        "FixedVersion": "2.4.0, 1.20.9",
+        "Status": "fixed",
+        "Severity": "HIGH",
+        "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-111181",
+        "CweIDs": [
+         "CWE-248"
+        ]
+       },
+       {
+        "Title": "body-parser: body-parser: Denial of Service via invalid limit option",
+        "VulnerabilityID": "CVE-2026-12590",
+        "PkgName": "body-parser",
+        "InstalledVersion": "1.18.3",
+        "FixedVersion": "1.20.6, 2.3.0",
+        "Status": "fixed",
+        "Severity": "LOW",
+        "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-12590",
+        "CweIDs": [
+         "CWE-770"
+        ]
+       },
+       {
+        "Title": "Arbitrary local file read vulnerability during template rendering ",
+        "VulnerabilityID": "CVE-2023-25345",
+        "PkgName": "swig",
+        "InstalledVersion": "1.4.2",
+        "Status": "affected",
+        "Severity": "HIGH",
+        "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2023-25345",
+        "CweIDs": [
+         "CWE-22"
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "warnings": [
+  "El repo no trae lockfile: sus dependencias se analizaron en la imagen"
+ ],
+ "database": {
+  "UpdatedAt": "2026-11-05T19:01:45Z"
+ },
+ "lockfiles": []
+}

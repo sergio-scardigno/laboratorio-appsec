@@ -33,6 +33,13 @@ class SonarApi:
         with urllib.request.urlopen(req, timeout=60) as resp:
             return json.load(resp)
 
+    def post(self, path: str, **params) -> None:
+        data = urllib.parse.urlencode(params).encode()
+        req = urllib.request.Request(f"{self.base_url}{path}", data=data, method="POST",
+                                     headers={"Authorization": self.auth})
+        with urllib.request.urlopen(req, timeout=60):
+            pass
+
     def paged(self, path: str, key: str, **params) -> tuple[list[dict], int]:
         """Devuelve (elementos, total declarado por la API)."""
         items: list[dict] = []
@@ -99,10 +106,19 @@ def collect(api: SonarApi, project_key: str) -> dict:
     }
 
 
+def project_key(run_id: str) -> str:
+    return f"lab-{run_id}"
+
+
+def delete_project(sonar_url: str, token: str, key: str) -> None:
+    """Borra el proyecto de un análisis; la puerta lo hace para no acumular uno por push."""
+    SonarApi(sonar_url, token).post("/api/projects/delete", project=key)
+
+
 def run(
     src: Path, out_dir: Path, run_id: str, sonar_url: str, token: str, timeout_s: int = 2400
 ) -> ToolResult:
-    project_key = f"lab-{run_id}"
+    key = project_key(run_id)
     work = out_dir / "scannerwork"
     work.mkdir(parents=True, exist_ok=True)
     log = out_dir / "sonar-scanner.log"
@@ -121,7 +137,7 @@ def run(
             "-v", f"{work.resolve()}:/work",
         ],
         [
-            f"-Dsonar.projectKey={project_key}",
+            f"-Dsonar.projectKey={key}",
             f"-Dsonar.projectName={run_id}",
             "-Dsonar.sources=.",
             "-Dsonar.working.directory=/work/scanner",
@@ -155,7 +171,7 @@ def run(
                 "sonar", "error", time.monotonic() - started,
                 message=f"Sonar rechazó el análisis: {task['status']} {task.get('errorMessage', '')}",
             )
-        data = collect(api, project_key)
+        data = collect(api, key)
     except (urllib.error.URLError, TimeoutError, KeyError, ValueError) as exc:
         return ToolResult("sonar", "error", time.monotonic() - started, message=f"Error con la API: {exc}")
 
@@ -169,6 +185,6 @@ def run(
             "hotspots": len(data["hotspots"]),
             "hotspots_total": data["hotspots_total"],
             "rules": len(data["rules"]),
-            "project_key": project_key,
+            "project_key": key,
         },
     )

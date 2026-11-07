@@ -9,7 +9,10 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 # Archivos con los que un repo podría ocultar su propio código a los escáneres.
-SCANNER_CONTROL_FILES = {".semgrepignore", "sonar-project.properties"}
+SCANNER_CONTROL_FILES = {
+    ".semgrepignore", "sonar-project.properties",
+    ".trivyignore", ".trivyignore.yaml", "trivy.yaml", "trivy-secret.yaml",
+}
 
 
 class SourceError(Exception):
@@ -43,15 +46,45 @@ def github_auth_env(url: str, token: str) -> dict[str, str]:
     }
 
 
-def clone(url: str, dest: Path, ref: str | None = None, timeout_s: int = 600, github_token: str = "") -> None:
+_AUTH_ERRORS = ("could not read Username", "Authentication failed", "returned error: 401", "returned error: 403")
+
+
+def clone(url: str, dest: Path, ref: str | None = None, timeout_s: int = 600, github_token: str = "") -> str:
+    """Clona el repo. Devuelve un aviso si hubo que prescindir del token, o una cadena vacía.
+
+    Un token caducado o revocado hace fallar también los repos públicos, porque GitHub
+    rechaza la credencial antes de mirar el repo. Por eso se reintenta sin él.
+    """
     validate_repo_url(url)
+    auth = github_auth_env(url, github_token)
+    result = _run_clone(url, dest, ref, timeout_s, auth)
+    if result.returncode == 0:
+        return ""
+    if auth and any(marker in result.stderr for marker in _AUTH_ERRORS):
+        shutil.rmtree(dest, ignore_errors=True)
+        retry = _run_clone(url, dest, ref, timeout_s, {})
+        if retry.returncode == 0:
+            return "GitHub rechazó LAB_GITHUB_TOKEN y el repo se clonó sin él: renueva o quita ese token de .env"
+        raise SourceError(
+            "No se pudo clonar el repo. GitHub rechazó LAB_GITHUB_TOKEN, o caducó o no tiene acceso a este "
+            "repo, y sin el token tampoco se puede leer, así que probablemente es privado"
+        )
+    message = f"git clone falló: {result.stderr.strip()[-400:]}"
+    if any(marker in result.stderr for marker in _AUTH_ERRORS) or "not found" in result.stderr:
+        message += ". Si el repo es privado, pon un token de solo lectura en LAB_GITHUB_TOKEN (.env)"
+    raise SourceError(message)
+
+
+def _run_clone(
+    url: str, dest: Path, ref: str | None, timeout_s: int, auth: dict[str, str]
+) -> subprocess.CompletedProcess:
     env = {
         **os.environ,
         "GIT_TERMINAL_PROMPT": "0",
         "GIT_TEMPLATE_DIR": "",
         "GIT_LFS_SKIP_SMUDGE": "1",
         "GIT_CONFIG_NOSYSTEM": "1",
-        **github_auth_env(url, github_token),
+        **auth,
     }
     argv = [
         "git", "-c", "core.hooksPath=/dev/null", "-c", "core.symlinks=false",
@@ -62,17 +95,9 @@ def clone(url: str, dest: Path, ref: str | None = None, timeout_s: int = 600, gi
         argv += ["--branch", ref]
     argv += ["--", url, str(dest)]
     try:
-        result = subprocess.run(argv, env=env, capture_output=True, text=True, timeout=timeout_s)
+        return subprocess.run(argv, env=env, capture_output=True, text=True, timeout=timeout_s)
     except subprocess.TimeoutExpired as exc:
         raise SourceError(f"git clone superó {timeout_s}s") from exc
-    if result.returncode != 0:
-        message = f"git clone falló: {result.stderr.strip()[-400:]}"
-        if "could not read Username" in result.stderr or "not found" in result.stderr:
-            message += (
-                ". Si el repo es privado, pon un token de solo lectura en LAB_GITHUB_TOKEN (.env)"
-                if not github_token else ". Comprueba que LAB_GITHUB_TOKEN tiene acceso a este repo"
-            )
-        raise SourceError(message)
 
 
 def sanitize(src: Path) -> list[str]:

@@ -17,5 +17,10 @@ def sonar_raw():
 
 
 @pytest.fixture
+def trivy_raw():
+    return json.loads((FIXTURES / "trivy.json").read_text())
+
+
+@pytest.fixture
 def zap_raw():
     return json.loads((FIXTURES / "zap.json").read_text())

@@ -1,0 +1,106 @@
+#!/usr/bin/env bash
+# Puerta antes del push del laboratorio AppSec.
+#
+# 1. Política de autoría, en local: commits nuevos firmados por el propietario, sin
+#    coautores ni marcas de agentes, y sin carpetas o archivos de agentes.
+# 2. El pre-push propio del repo, si tiene uno.
+# 3. Análisis en el laboratorio de lo que se sube (Semgrep, SonarQube y Trivy):
+#    bloquea lo crítico, lo alto y los secretos nuevos.
+#
+# La política se aplica siempre. El análisis se desactiva en un repo con
+# git config appsec.scan false. git push --no-verify se salta todo el hook: git no
+# permite impedirlo desde el cliente; para eso está "Require signed commits" en GitHub.
+set -u
+
+HOOK_DIR="$(cd "$(dirname "$0")" && pwd)"
+APPSEC_HOME="${APPSEC_HOME:-$(cd "$HOOK_DIR/.." && pwd)}"
+# shellcheck source=../lib.sh
+. "$APPSEC_HOME/lib.sh"
+
+remote_name="${1:-}"
+remote_url="${2:-$remote_name}"
+refs="$(cat)"
+
+run_repo_hook() {
+  local own
+  own="$(git rev-parse --git-common-dir)/hooks/pre-push"
+  if [ -x "$own" ] && [ "$(cd "$(dirname "$own")" && pwd)" != "$HOOK_DIR" ]; then
+    printf '%s\n' "$refs" | "$own" "$@" || exit $?
+  fi
+}
+
+scan_needed=""
+to_scan=""
+blocked=0
+while read -r local_ref local_sha remote_ref remote_sha; do
+  [ -n "${local_ref:-}" ] || continue
+  appsec_is_zero "$local_sha" && continue  # Borrar una rama no publica nada.
+  [ "$(git cat-file -t "$local_sha" 2>/dev/null)" = "commit" ] || \
+    local_sha="$(git rev-parse --verify --quiet "$local_sha^{commit}")" || continue
+  new="$(appsec_new_commits "$local_sha" "$remote_sha")"
+  [ -n "$new" ] || continue  # Nada nuevo que publicar en esta ref.
+  appsec_say "revisando la autoría de $(printf '%s\n' "$new" | wc -l | tr -d ' ') commits nuevos en ${remote_ref#refs/heads/}"
+  if ! problems="$(printf '%s\n' "$new" | appsec_check_policy "$local_sha")"; then
+    printf '%s\n' "$problems" | sed 's/^/  /' >&2
+    blocked=1
+    continue
+  fi
+  case " $to_scan " in *" $local_sha "*) ;; *) to_scan="$to_scan $local_sha" ;; esac
+  printf '%s\n' "$new" >"${TMPDIR:-/tmp}/appsec-new-$local_sha.$$"
+  scan_needed="$local_sha"
+done <<EOF
+$refs
+EOF
+
+if [ "$blocked" -ne 0 ]; then
+  appsec_say "BLOQUEADO por la política de autoría: solo se aceptan commits tuyos y firmados, sin agentes"
+  rm -f "${TMPDIR:-/tmp}"/appsec-new-*."$$"
+  exit 1
+fi
+
+run_repo_hook "$@"
+
+[ -n "$scan_needed" ] || exit 0
+if [ "$(appsec_config appsec.scan true)" = "false" ]; then
+  appsec_say "análisis desactivado en este repo (appsec.scan=false); la autoría sí se revisó"
+  rm -f "${TMPDIR:-/tmp}"/appsec-new-*."$$"
+  exit 0
+fi
+repo="$(appsec_repo_name "$remote_url")"
+mkdir -p "$APPSEC_CACHE"
+
+for sha in $to_scan; do
+  list="${TMPDIR:-/tmp}/appsec-new-$sha.$$"
+  work="$(mktemp -d "${TMPDIR:-/tmp}/appsec-push.XXXXXX")"
+  # Lo commiteado, no la carpeta de trabajo; y el diff de los commits nuevos,
+  # porque un secreto borrado en un commit posterior también se publica.
+  git archive --format=tar -o "$work/src.tar" "$sha" || { rm -rf "$work"; exit 1; }
+  mkdir -p "$work/extra/.lab-history"
+  git log -p --no-color --no-ext-diff --format='commit %H%n%n%B' --no-walk=unsorted --stdin \
+    <"$list" >"$work/extra/.lab-history/commits.patch"
+  tar -rf "$work/src.tar" -C "$work/extra" .lab-history/commits.patch
+  rm -f "$list"
+
+  appsec_say "analizando $(git rev-parse --short "$sha") de $repo en el laboratorio (1-3 minutos)..."
+  appsec_ssh gate "$repo" <"$work/src.tar" 2>&1 | tee "$work/out" >&2
+  status="${PIPESTATUS[0]}"
+  run_id="$(sed -n 's/^GATE-RUN: \([0-9a-f-]*\).*/\1/p' "$work/out" | tail -1)"
+
+  if [ "$status" -ne 0 ]; then
+    if [ -n "$run_id" ] && appsec_ssh report "$run_id" >"$APPSEC_CACHE/$run_id.html" 2>/dev/null; then
+      appsec_say "informe: $APPSEC_CACHE/$run_id.html"
+    fi
+    case "$status" in
+      1) appsec_say "BLOQUEADO: corrige los hallazgos, o acéptalos con motivo: git gate accept $run_id \"motivo\"" ;;
+      2) appsec_say "BLOQUEADO: el análisis quedó incompleto; vuelve a intentarlo o revisa el laboratorio" ;;
+      255) appsec_say "BLOQUEADO: no se pudo conectar con el laboratorio. Si de verdad quieres subir sin revisar: git push --no-verify" ;;
+      *) appsec_say "BLOQUEADO: el laboratorio rechazó el análisis (código $status)" ;;
+    esac
+    rm -rf "$work"
+    exit 1
+  fi
+  rm -rf "$work"
+done
+
+appsec_say "todo en orden: sube"
+exit 0

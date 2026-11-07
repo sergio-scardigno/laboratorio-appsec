@@ -151,3 +151,86 @@ def test_zap_text_keeps_paragraph_breaks_and_decodes_entities(zap_raw):
     alert = zap_raw["site"][0]["alerts"][0]
     alert["solution"] = "<p>Uno.</p><p>Dos &amp; tres &lt;b&gt;.</p>"
     assert parse_zap(zap_raw).findings[0].solution == "Uno. Dos & tres <b>."
+
+
+def test_trivy_reconciles_and_every_finding_is_unique(trivy_raw):
+    from lab.normalize import parse_trivy
+
+    result = parse_trivy(trivy_raw)
+    assert result.reconciled and result.raw_count > 0
+    assert len({f.fingerprint for f in result.findings}) == len(result.findings)
+
+
+def test_trivy_vulnerable_dependency_is_a03_whatever_the_advisory_says(trivy_raw):
+    from lab.normalize import parse_trivy
+
+    vulns = [f for f in parse_trivy(trivy_raw).findings if f.cwes == [1395]]
+    assert vulns and all(f.categories == ["A03:2025"] for f in vulns)
+    with_advisory = next(f for f in vulns if f.advisory_cwes)
+    assert 1395 not in with_advisory.advisory_cwes
+
+
+def test_trivy_secret_is_a07_and_never_copies_its_value(trivy_raw):
+    from lab.normalize import parse_trivy
+
+    secret_value = "-----BEGIN PRIVATE KEY-----supersecreto"
+    item = next(r for r in trivy_raw["scans"][0]["report"]["Results"] if r.get("Secrets"))
+    item["Secrets"][0]["Match"] = secret_value
+    item["Secrets"][0]["Code"] = {"Lines": [{"Content": secret_value}]}
+    findings = parse_trivy(trivy_raw).findings
+    secrets = [f for f in findings if f.cwes == [798]]
+    assert secrets and all(f.categories == ["A07:2025"] for f in secrets)
+    assert secret_value not in str([f.to_dict() for f in findings])
+
+
+def test_trivy_same_vulnerability_in_two_paths_counts_once_with_a_reason():
+    from lab.normalize import parse_trivy
+
+    vuln = {"VulnerabilityID": "CVE-1", "PkgName": "a", "InstalledVersion": "1", "Severity": "HIGH"}
+    data = {"scans": [{"kind": "fs", "report": {"Results": [
+        {"Target": "x/package-lock.json", "Vulnerabilities": [vuln]},
+        {"Target": "y/package-lock.json", "Vulnerabilities": [vuln]},
+    ]}}]}
+    result = parse_trivy(data)
+    assert len(result.findings) == 1 and result.reconciled
+    assert "otra ruta" in result.discarded[0]["reason"]
+
+
+def test_trivy_unknown_severity_and_missing_fix_are_explained():
+    from lab.normalize import parse_trivy
+
+    data = {"scans": [{"kind": "fs", "report": {"Results": [{"Target": "l", "Vulnerabilities": [
+        {"VulnerabilityID": "X-1", "PkgName": "a", "InstalledVersion": "1", "Severity": "UNKNOWN"},
+    ]}]}}]}
+    finding = parse_trivy(data).findings[0]
+    assert finding.severity == "medium" and "no informa" in finding.message
+    assert "no hay una versión corregida" in finding.solution
+
+
+def test_trivy_malformed_item_is_discarded_not_lost():
+    from lab.normalize import parse_trivy
+
+    data = {"scans": [{"kind": "fs", "report": {"Results": [{"Target": "l", "Vulnerabilities": [{"x": 1}], "Secrets": [{"y": 2}]}]}}]}
+    result = parse_trivy(data)
+    assert result.reconciled and len(result.discarded) == 2
+
+
+def test_trivy_image_findings_say_where_they_come_from(trivy_raw):
+    from lab.normalize import parse_trivy
+
+    files = {f.file for f in parse_trivy(trivy_raw).findings}
+    assert any(f == "imagen: sistema operativo" for f in files)
+    assert not any("/image.tar" in f for f in files)
+
+
+def test_trivy_warnings_are_kept(trivy_raw):
+    from lab.normalize import parse_trivy
+
+    assert "no trae lockfile" in parse_trivy(trivy_raw).warnings[0]
+
+
+def test_trivy_results_can_be_null():
+    from lab.normalize import parse_trivy
+
+    result = parse_trivy({"scans": [{"kind": "fs", "report": {"Results": None}}]})
+    assert result.findings == [] and result.reconciled

@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# Comando de la puerta antes del push. Con install.sh queda como "git gate".
+#
+#   git gate check                  política de autoría sobre lo que aún no está en el remoto
+#   git gate accept <run> "motivo"  acepta en la línea base lo que bloqueó ese análisis
+#   git gate list                   muestra la línea base de este repo
+#   git gate report <run>           descarga y abre el informe de un análisis
+set -u
+APPSEC_HOME="${APPSEC_HOME:-$(cd "$(dirname "$0")/.." && pwd)}"
+# shellcheck source=../lib.sh
+. "$APPSEC_HOME/lib.sh"
+
+repo_name() {
+  local remote url
+  remote="$(git config --get "branch.$(git symbolic-ref --short -q HEAD).remote" 2>/dev/null || echo origin)"
+  url="$(git remote get-url "$remote" 2>/dev/null)" || { appsec_say "este repo no tiene remoto"; exit 3; }
+  appsec_repo_name "$url"
+}
+
+open_file() {
+  if command -v xdg-open >/dev/null; then xdg-open "$1" >/dev/null 2>&1 &
+  elif command -v open >/dev/null; then open "$1"
+  elif command -v cmd.exe >/dev/null; then cmd.exe /c start "" "$(cygpath -w "$1" 2>/dev/null || echo "$1")"
+  fi
+}
+
+case "${1:-}" in
+  check)
+    tip="$(git rev-parse HEAD)" || exit 3
+    if git rev-list "$tip" --not --remotes | appsec_check_policy "$tip"; then
+      appsec_say "autoría en orden"
+    else
+      exit 1
+    fi
+    ;;
+  accept)
+    [ $# -eq 3 ] || { echo "uso: git gate accept <run_id> \"motivo\"" >&2; exit 3; }
+    printf '%s' "$3" | appsec_ssh accept "$(repo_name)" "$2"
+    ;;
+  list)
+    appsec_ssh list "$(repo_name)"
+    ;;
+  report)
+    [ $# -eq 2 ] || { echo "uso: git gate report <run_id>" >&2; exit 3; }
+    mkdir -p "$APPSEC_CACHE"
+    out="$APPSEC_CACHE/$2.html"
+    appsec_ssh report "$2" >"$out" || { rm -f "$out"; exit 1; }
+    echo "$out"
+    open_file "$out"
+    ;;
+  *)
+    sed -n '2,8p' "$0" | sed 's/^# \{0,1\}//'
+    exit 3
+    ;;
+esac

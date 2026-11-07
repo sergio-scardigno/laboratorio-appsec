@@ -27,6 +27,7 @@ STAGES = [
     ("source", "Obtener el código"),
     ("semgrep", "Semgrep"),
     ("sonar", "SonarQube"),
+    ("trivy", "Trivy"),
     ("zap", "ZAP"),
     ("report", "Mapear y generar el informe"),
 ]
@@ -90,7 +91,7 @@ def stage_view(run: dict, events: list[dict]) -> list[dict]:
     request = run["request"]
     sast = bool(request.get("preset") or request.get("repo") or request.get("local_path"))
     dast = bool(request.get("preset") or request.get("url"))
-    applies = {"source": sast, "semgrep": sast, "sonar": sast, "zap": dast, "report": True}
+    applies = {"source": sast, "semgrep": sast, "sonar": sast, "trivy": sast, "zap": dast, "report": True}
     latest = {event["stage"]: event for event in events}
     view = []
     for stage, name in STAGES:

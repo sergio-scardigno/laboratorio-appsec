@@ -8,7 +8,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 LABELS = {"ok": "Completo", "partial": "Parcial", "error": "Con error"}
-TOOL_LABELS = {"semgrep": "Semgrep", "sonar": "SonarQube", "zap": "ZAP"}
+TOOL_LABELS = {"semgrep": "Semgrep", "sonar": "SonarQube", "trivy": "Trivy", "zap": "ZAP"}
 TOOL_STATUS = {"ok": "Correcto", "error": "Falló", "skipped": "No se ejecutó"}
 
 

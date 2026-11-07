@@ -14,10 +14,10 @@
 .banner { margin: 0 0 20px; }
 .banner ul { margin: 4px 0 0; padding-left: 1.1em; }
 .matrix-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--rule); }
-table.matrix { border-collapse: collapse; width: 100%; min-width: 760px; font-size: .95rem; }
+table.matrix { border-collapse: collapse; width: 100%; min-width: 860px; font-size: .95rem; }
 .matrix th, .matrix td { padding: 0; border-bottom: 1px solid var(--rule-2); text-align: left; vertical-align: middle; }
 .matrix thead th { font-weight: 600; font-size: .875rem; padding: 10px 12px; border-bottom: 1px solid var(--rule); }
-.matrix thead th.tool { text-align: center; width: 92px; }
+.matrix thead th.tool { text-align: center; width: 84px; }
 .matrix tbody th { font-weight: 400; padding: 10px 12px; }
 .matrix tbody th b { font-weight: 600; font-variant-numeric: tabular-nums; }
 .matrix tbody th small { display: block; color: var(--ink-2); font-size: .8rem; line-height: 1.35; margin-top: 2px; max-width: 46ch; }
@@ -103,7 +103,7 @@ a.cell:hover { outline: 2px solid var(--accent); outline-offset: -2px; }
   {% set failed = results.values() | selectattr("status", "equalto", "error") | list %}
   {% if failed %}
   <div class="banner" role="alert">
-    <strong>Resultado incompleto: {{ failed | map(attribute="tool") | map("replace", "sonar", "SonarQube") | join(", ") }} no terminó bien.</strong>
+    <strong>Resultado incompleto: {% for r in failed %}{{ tool_labels[r.tool] }}{% if not loop.last %}, {% endif %}{% endfor %} no terminó bien.</strong>
     Lo que esa herramienta debía ver no está en este informe. Una categoría con pocos hallazgos no significa que esté limpia.
     <ul>{% for r in failed %}<li>{{ tool_labels[r.tool] }}: {{ r.message or "sin detalle" }}</li>{% endfor %}</ul>
   </div>
@@ -169,7 +169,7 @@ a.cell:hover { outline: 2px solid var(--accent); outline-offset: -2px; }
 
   <div class="notes">
     <p>Un cero significa que la herramienta miró y no encontró nada, no que no haya problemas. La columna Alcance dice cuánto pueden ver estas herramientas en cada categoría; es una valoración de este laboratorio, no de OWASP.</p>
-    <p>El mapeo sale del CWE de cada hallazgo y de la tabla oficial de OWASP. Un hallazgo con varios CWE cuenta en cada categoría que le corresponde, así que las filas suman más que el total. Si dos herramientas coinciden en archivo, CWE y línea (±3), cuenta como un hallazgo para ambas.</p>
+    <p>El mapeo sale del CWE de cada hallazgo y de la tabla oficial de OWASP. Un hallazgo con varios CWE cuenta en cada categoría que le corresponde, así que las filas suman más que el total. Si dos herramientas coinciden en archivo, CWE y línea (±3), cuenta como un hallazgo para ambas. Trivy se mapea por la naturaleza del hallazgo: una dependencia vulnerable es CWE-1395 (A03) y un secreto es CWE-798 (A07).</p>
     {% if results.zap.status != "skipped" and meta.correlated %}<p>{% if meta.correlated == 1 %}1 hallazgo de ZAP comparte{% else %}{{ meta.correlated }} hallazgos de ZAP comparten{% endif %} CWE con alguno de código. Es una correlación probable, no una confirmación de que sean el mismo fallo.</p>{% endif %}
   </div>
 
@@ -248,7 +248,8 @@ a.cell:hover { outline: 2px solid var(--accent); outline-offset: -2px; }
           {% if f.instance_count > f.instances | length %}<p class="muted">Se muestran {{ f.instances | length }} de {{ f.instance_count }}. El resto está en findings.json.</p>{% endif %}
           {% endif %}
           {% if f.solution %}<p><strong>Cómo corregirlo:</strong> {{ f.solution }}</p>{% endif %}
-          <p class="muted">Regla: <code>{{ f.rule_id }}</code>{% if f.confidence %}. Confianza: {{ f.confidence }}{% endif %}{% for c in f.cwes %}. <a href="https://cwe.mitre.org/data/definitions/{{ c }}.html" rel="noreferrer noopener" target="_blank">CWE-{{ c }}</a>{% endfor %}</p>
+          {% if f.advisory_cwes %}<p class="muted">El aviso lo clasifica como CWE-{{ f.advisory_cwes | join(", CWE-") }}. Cuenta en A03 porque el hallazgo es depender de un componente vulnerable.</p>{% endif %}
+          <p class="muted">Regla: <code>{{ f.rule_id }}</code>{% if f.confidence %}. Confianza: {{ f.confidence }}{% endif %}{% for c in f.cwes %}. <a href="https://cwe.mitre.org/data/definitions/{{ c }}.html" rel="noreferrer noopener" target="_blank">CWE-{{ c }}</a>{% endfor %}{% if f.reference %}. <a href="{{ f.reference | safe_url }}" rel="noreferrer noopener" target="_blank">Aviso de seguridad</a>{% endif %}</p>
         </div>
       </details>
       {% endfor %}

@@ -1,13 +1,64 @@
+# Secretos y credenciales
 .env
-.env.tmp
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+id_rsa*
+id_ed25519*
+*.token
+.netrc
+.git-credentials
+credentials*.json
+secrets.*
+
+# Resultados de los análisis
+runs/
+*.db
+*.sqlite
+*.sqlite3
+*.sarif
+*.log
+findings*.json
+report*.html
+zap*.html
+semgrep*.json
+sonar*.json
+zap*.json
+trivy*.json
+.scannerwork/
+
+# Excepciones: datos de prueba recortados y plantillas sí se versionan
+!tests/fixtures/**
+!lab/templates/*.html
+
+# Descargas y cachés
+# Las reglas de Semgrep tienen su propia licencia: se descargan en la instalación
+rules/
+.cache/
+.semgrep/
+.trivycache/
 .venv/
 __pycache__/
 *.pyc
 *.egg-info/
 .pytest_cache/
-# Resultados de los análisis
-runs/
-# Reglas de Semgrep: se descargan en la instalación, tienen su propia licencia
-rules/
+
+# Editores y sistema
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
 # Textos privados: no se publican en este repo
 publicacion/
+
+# Puerta antes del push: líneas base y código recibido, solo en el laboratorio
+gate/

@@ -214,6 +214,84 @@ def parse_zap(data: dict, max_instances: int = 20) -> ParseResult:
     return ParseResult("zap", findings, raw_count, discarded, _zap_warnings(data))
 
 
+# El hallazgo es depender de un componente vulnerable, sea cual sea el fallo de ese componente.
+CWE_VULNERABLE_DEPENDENCY = 1395
+CWE_HARDCODED_CREDENTIALS = 798
+TRIVY_SEVERITY = {"CRITICAL": "critical", "HIGH": "high", "MEDIUM": "medium", "LOW": "low"}
+
+
+def _trivy_location(scan_kind: str, result: dict, vuln: dict) -> str:
+    if scan_kind != "image":
+        return result.get("Target", "")
+    if result.get("Class") == "os-pkgs":
+        return "imagen: sistema operativo"
+    return f"imagen: {vuln.get('PkgPath') or result.get('Target', '')}"
+
+
+def parse_trivy(data: dict) -> ParseResult:
+    findings, discarded = [], []
+    seen: set[str] = set()
+    raw_count = 0
+    for scan in data.get("scans", []):
+        kind = scan.get("kind", "fs")
+        for result in scan.get("report", {}).get("Results") or []:
+            for vuln in result.get("Vulnerabilities") or []:
+                raw_count += 1
+                try:
+                    vuln_id, package, version = vuln["VulnerabilityID"], vuln["PkgName"], vuln["InstalledVersion"]
+                    key = fingerprint("trivy", vuln_id, package, version)
+                    if key in seen:
+                        discarded.append({"item": f"{vuln_id} {package} {version}", "reason": "Misma vulnerabilidad, paquete y versión en otra ruta"})
+                        continue
+                    seen.add(key)
+                    fixed = vuln.get("FixedVersion")
+                    severity = str(vuln.get("Severity")).upper()
+                    message = vuln.get("Title") or ""
+                    if severity not in TRIVY_SEVERITY:
+                        message = f"{message} (Trivy no informa la gravedad)".strip()
+                    findings.append(Finding(
+                        fingerprint=key,
+                        tool="trivy",
+                        rule_id=vuln_id,
+                        title=f"{vuln_id} en {package} {version}",
+                        severity=TRIVY_SEVERITY.get(severity, "medium"),
+                        categories=categories_for([CWE_VULNERABLE_DEPENDENCY]),
+                        cwes=[CWE_VULNERABLE_DEPENDENCY],
+                        advisory_cwes=_cwe_numbers(vuln.get("CweIDs")),
+                        message=message,
+                        file=_trivy_location(kind, result, vuln),
+                        solution=f"Actualiza {package} a {fixed}." if fixed else "Aún no hay una versión corregida publicada.",
+                        reference=vuln.get("PrimaryURL") or "",
+                    ))
+                except (KeyError, TypeError) as exc:
+                    discarded.append({"item": str(vuln)[:200], "reason": f"Formato inesperado: {exc!r}"})
+            for secret in result.get("Secrets") or []:
+                raw_count += 1
+                try:
+                    path, line = result["Target"], secret["StartLine"]
+                    key = fingerprint("trivy", secret["RuleID"], path, line)
+                    if key in seen:
+                        discarded.append({"item": f"{secret['RuleID']} {path}:{line}", "reason": "Duplicado exacto en la salida de Trivy"})
+                        continue
+                    seen.add(key)
+                    # Solo metadatos: Match y Code contienen o rodean el secreto.
+                    findings.append(Finding(
+                        fingerprint=key,
+                        tool="trivy",
+                        rule_id=secret["RuleID"],
+                        title=secret.get("Title") or secret["RuleID"],
+                        severity=TRIVY_SEVERITY.get(str(secret.get("Severity")).upper(), "medium"),
+                        categories=categories_for([CWE_HARDCODED_CREDENTIALS]),
+                        cwes=[CWE_HARDCODED_CREDENTIALS],
+                        message="Posible secreto en el código. Su valor no se copia a este informe.",
+                        file=path,
+                        line=line,
+                    ))
+                except (KeyError, TypeError) as exc:
+                    discarded.append({"item": "secreto con formato inesperado", "reason": f"Formato inesperado: {type(exc).__name__}"})
+    return ParseResult("trivy", findings, raw_count, discarded, list(data.get("warnings", [])))
+
+
 def attach_snippets(findings: list[Finding], src: Path, max_len: int = 240) -> None:
     """Añade la línea de código a los hallazgos SAST.
 
